@@ -1,0 +1,397 @@
+/* ==========================================================================
+   eFootball Tournament Hub - Dark Premium CSS Base
+   ========================================================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #0d1117;
+    color: #c9d1d9;
+    line-height: 1.6;
+    padding-bottom: 50px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* হেডার ও টপ নেভিগেশন */
+.league-header {
+    background: linear-gradient(135deg, #111827, #070a13);
+    padding: 15px 20px;
+    border-bottom: 3px solid #388bfd;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+    position: sticky;
+    top: 0;
+    z-index: 999;
+}
+
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.back-btn, .back-link-btn {
+    background-color: #1f242c;
+    color: #c9d1d9;
+    border: 1px solid #30363d;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.2s;
+}
+
+.back-btn:hover, .back-link-btn:hover {
+    background-color: #30363d;
+    color: #ffffff;
+}
+
+.league-header h1 {
+    color: #58a6ff;
+    font-size: 1.4rem;
+    letter-spacing: 1px;
+}
+
+.badge {
+    background-color: #238636;
+    color: #ffffff;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+/* সেকশন কার্ড লেআউট */
+.card-section {
+    background-color: #121824;
+    border: 1px solid #21262d;
+    border-radius: 12px;
+    padding: 25px;
+    margin-top: 25px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #21262d;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+.section-header h2 {
+    font-size: 1.2rem;
+    color: #ffffff;
+    margin: 0;
+}
+
+#show-create-form-btn, .submit-btn {
+    background-color: #238636;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#show-create-form-btn:hover, .submit-btn:hover {
+    background-color: #2ea043;
+}
+
+/* অ্যাক্টিভ টুর্নামেন্ট প্যানেল বর্গাকার গ্রিড */
+.leagues-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.league-card {
+    background: linear-gradient(145deg, #161d2d, #0d131f);
+    border: 1px solid #28354e;
+    border-radius: 12px;
+    padding: 20px;
+    cursor: pointer;
+    position: relative;
+    aspect-ratio: 1 / 1; /* নিখুঁত বর্গাকার বা স্কয়ার সাইজ */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.league-card:hover {
+    border-color: #58a6ff;
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(56, 139, 253, 0.25);
+}
+
+.league-card h3 {
+    color: #ffffff;
+    font-size: 1.25rem;
+    border-bottom: 1px solid #28354e;
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.league-card-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex-grow: 1;
+    justify-content: center;
+}
+
+.league-card-meta p {
+    color: #8b949e;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.card-prize-highlight {
+    background-color: #0d131f;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px dashed #28354e;
+    margin-top: 10px;
+    font-size: 0.8rem;
+}
+
+.delete-tournament-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background-color: rgba(248, 81, 73, 0.1);
+    color: #f85149;
+    border: 1px solid rgba(248, 81, 73, 0.2);
+    border-radius: 6px;
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.delete-tournament-btn:hover {
+    background-color: #f85149;
+    color: white;
+}
+
+/* ফর্ম কন্ট্রোল ডিজাইন */
+.form-grid { display: flex; flex-direction: column; gap: 20px; }
+.form-group { display: flex; flex-direction: column; gap: 8px; }
+.form-group label { font-weight: 600; color: #c9d1d9; }
+.form-grid input, .form-grid textarea { background-color: #0d1117; border: 1px solid #21262d; border-radius: 6px; padding: 10px; color: #ffffff; }
+.form-grid input:focus, .form-grid textarea:focus { border-color: #388bfd; outline: none; }
+.form-group-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px; }
+.days-checkbox-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; background-color: #0d1117; padding: 15px; border-radius: 6px; border: 1px solid #21262d; }
+
+/* টুর্নামেন্ট ভিউ ড্যাশবোর্ড বার */
+.league-view-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; }
+.league-view-header h2 { margin: 0; font-size: 1.3rem; color: #fff; }
+.messenger-btn { background-color: #006aff; color: white; text-decoration: none; padding: 10px 16px; border-radius: 20px; font-weight: bold; font-size: 0.9rem; box-shadow: 0 4px 10px rgba(0, 106, 255, 0.3); }
+
+.prize-info-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; background-color: #0d1117; padding: 15px; border-radius: 8px; border: 1px solid #21262d; margin-bottom: 25px; text-align: center; }
+.tab-container { display: flex; gap: 10px; border-bottom: 2px solid #21262d; margin-bottom: 20px; }
+.tab-btn { background: none; border: none; color: #8b949e; padding: 10px 20px; font-size: 1rem; font-weight: bold; cursor: pointer; position: relative; }
+.tab-btn.active { color: #58a6ff; }
+.tab-btn.active::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 100%; height: 2px; background-color: #58a6ff; }
+
+/* পয়েন্ট টেবিল ডিজাইন */
+.table-responsive { overflow-x: auto; }
+.standings-table { width: 100%; border-collapse: collapse; text-align: center; }
+.standings-table th, .standings-table td { padding: 12px; border-bottom: 1px solid #21262d; }
+.standings-table th { background-color: #0d1117; color: #8b949e; }
+.standings-table tbody tr:hover { background-color: #161d2d; }
+
+/* ম্যাচ ফিক্সচার ব্লক কন্টেইনার */
+.matchday-container-box {
+    background-color: #161d2d;
+    border: 1px solid #28354e;
+    border-radius: 10px;
+    margin-bottom: 30px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.matchday-header-bar {
+    background-color: #202b3e;
+    padding: 12px 20px;
+    color: #58a6ff;
+    font-weight: bold;
+    font-size: 1.05rem;
+    border-bottom: 1px solid #28354e;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.selected-days-badge {
+    background-color: #0b0f19;
+    color: #ffaa47;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    border: 1px solid #2b374a;
+}
+
+/* 💡 [১০০% ফিক্সড গ্রিড ইঞ্জিন] - পাশাপাশি ২টি কলাম বক্স ফিরিয়ে আনার জাদুকরী কোড */
+.google-matches-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)) !important; /* এক লাইনে ২টি বক্স আনার গ্যারান্টি */
+    background-color: #0b0f19;
+    gap: 15px;
+    padding: 15px;
+}
+
+/* 🥊 কাস্টম প্রিমিয়াম স্পোর্টস কালার ফ্রেম বক্স */
+.google-match-row {
+    background-color: #1a2333;
+    border: 1px solid #2b374a;
+    border-radius: 8px;
+    padding: 15px 20px;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+}
+
+.teams-vertical-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+}
+
+.player-line-node {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.player-identity {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.player-display-name {
+    font-weight: 600;
+    color: #ffffff;
+    font-size: 0.95rem;
+}
+
+.score-poss-block {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.node-score {
+    font-size: 1.15rem;
+    font-weight: bold;
+    color: #ffffff;
+    min-width: 20px;
+    text-align: right;
+}
+
+.node-poss {
+    font-size: 0.75rem;
+    color: #8b949e;
+}
+
+/* ডানদিকের মেটা কলাম (FT/Time -> Date -> Score Button) */
+.match-meta-status {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border-left: 1px dashed #34445c;
+    padding-left: 15px;
+    margin-left: 15px;
+    min-width: 140px;
+}
+
+.slot-time { font-size: 0.85rem; font-weight: bold; color: #ffaa47; }
+.slot-date { font-size: 0.75rem; color: #8b949e; text-align: center; white-space: nowrap; }
+.update-score-btn { background-color: #21262d; color: #c9d1d9; border: 1px solid #30363d; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold; }
+.update-score-btn:hover { background-color: #388bfd; color: white; border-color: #388bfd; }
+.viewer-status-text { font-size: 0.75rem; font-weight: bold; color: #8b949e; }
+
+.dynamic-jersey-icon {
+    font-size: 1.2rem !important;
+    display: inline-block !important;
+    vertical-align: middle;
+    filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.5));
+}
+
+/* অ্যাডমিন মডাল পপ-আপ উইন্ডো */
+.modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center; z-index: 2000; }
+.modal-content { background-color: #161d2d; border: 1px solid #28354e; border-radius: 12px; width: 95%; max-width: 480px; padding: 25px; position: relative; }
+.close-modal { position: absolute; top: 15px; right: 20px; font-size: 1.8rem; color: #8b949e; cursor: pointer; }
+.close-modal:hover { color: white; }
+.modal-content h3 { margin-bottom: 20px; color: #fff; border-bottom: 1px solid #28354e; padding-bottom: 10px; }
+.modal-teams-row { display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 25px; }
+.modal-team-box { flex: 1; display: flex; flex-direction: column; gap: 10px; text-align: center; }
+.modal-team-box span { font-weight: bold; color: #58a6ff; }
+.modal-team-box input { background-color: #0d1117; border: 1px solid #21262d; border-radius: 6px; padding: 8px; color: white; text-align: center; }
+.modal-vs { font-weight: bold; color: #8b949e; }
+.save-btn { width: 100%; background-color: #238636; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+.save-btn:hover { background-color: #2ea043; }
+
+/* ==========================================================================
+   🏆 TOURNAMENT LIVE RESULT CARD STYLES
+   ========================================================================== */
+.live-result-dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+    margin-top: 20px;
+}
+
+.result-live-card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    padding: 25px;
+    text-align: center;
+    position: relative;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.result-live-card:hover { transform: translateY(-5px); }
+.gold-border { border-top: 5px solid #ffd700; box-shadow: 0 4px 15px rgba(255, 215, 0, 0.1); }
+.silver-border { border-top: 5px solid #c0c0c0; box-shadow: 0 4px 15px rgba(192, 192, 192, 0.1); }
+.bronze-border { border-top: 5px solid #cd7f32; box-shadow: 0 4px 15px rgba(205, 127, 50, 0.1); }
+
+.result-icon-crown { font-size: 2.5rem; color: #ffd700; margin-bottom: 10px; animation: bounce 2s infinite; }
+.result-icon-medal { font-size: 2.5rem; color: #c0c0c0; margin-bottom: 10px; }
+.result-icon-boot { font-size: 2.5rem; color: #ff7b72; margin-bottom: 10px; }
+
+.result-live-card h4 { font-size: 1.2rem; color: #8b949e; letter-spacing: 2px; margin-bottom: 15px; margin-top: 0; }
+.winner-identity-node { background: #0d1117; border-radius: 8px; padding: 15px; margin-bottom: 15px; border: 1px solid #21262d; }
+.result-identity-row { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 5px; }
+.winner-name { font-size: 1.3rem; font-weight: bold; color: #ffffff; }
+.winner-meta-sub { font-size: 0.9rem; color: #58a6ff; }
+.no-data-text { color: #8b949e; font-style: italic; font-size: 0.95rem; }
+.result-prize-tag { display: inline-block; background: #238636; color: #ffffff; font-size: 0.95rem; font-weight: 600; padding: 5px 15px; border-radius: 20px; }
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
