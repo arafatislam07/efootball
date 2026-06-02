@@ -4,17 +4,57 @@
 const ADMIN_PASSWORD = "@Arafat@#100yt@";
 let currentLanguage = localStorage.getItem("lang") || "bn"; // লোকাল স্টোরেজ থেকে ভাষা মনে রাখবে
 
-let playersRules = JSON.parse(localStorage.getItem("playersRules")) || [];
-let tournamentSystems = JSON.parse(localStorage.getItem("tournamentSystems")) || [];
+let playersRules = [];
+let tournamentSystems = [];
 
-// পেজ লোড হওয়ার সাথে সাথে সব ফাংশন রান করা
+// পেজ লোড হওয়ার সাথে সাথে ফায়ারবেস থেকে লাইভ ডেটা লিসেন করা শুরু হবে
 window.onload = function() {
-    renderRules();
     checkAdminStatus();
     updateInputFields();
     updateButtonText();
-    updateHeadings(); // হেডিং আপডেট করার জন্য নতুন ফাংশন
+    updateHeadings();
+    
+    // ফায়ারবেস থেকে ডেটা রিয়েল-টাইমে লোড করার মূল ফাংশনগুলো কল করা হলো
+    listenToFirebaseData();
 };
+
+// ==========================================================================
+// ১.৫. ফায়ারবেস লাইভ ডেটা লিসেনার (নতুন যোগ করা হয়েছে)
+// ==========================================================================
+function listenToFirebaseData() {
+    // ফায়ারবেস ডেটাবেজ রেফারেন্স চেক করা (HTML ফাইলে উইন্ডো অবজেক্টে সেট করা হয়েছিল)
+    if (!window.fbDatabase || !window.fbOnValue || !window.fbRef) {
+        console.error("Firebase কনফিগারেশন এখনো লোড হয়নি।");
+        return;
+    }
+
+    // ১. প্লেয়ারদের নিয়মের লাইভ ডেটা টেনে আনা
+    const rulesRef = window.fbRef(window.fbDatabase, 'rules/players');
+    window.fbOnValue(rulesRef, (snapshot) => {
+        const data = snapshot.val();
+        playersRules = [];
+        if (data) {
+            // ফায়ারবেসের অবজেক্ট কী (ID) গুলোকে অ্যারেতে কনভার্ট করা ডিলিটের সুবিধার্থে
+            Object.keys(data).forEach(key => {
+                playersRules.push({ id: key, bn: data[key].bn, en: data[key].en });
+            });
+        }
+        renderRules(); // ডেটা আসার সাথে সাথে স্ক্রিন রেন্ডার হবে
+    });
+
+    // ২. টুর্নামেন্ট সিস্টেমের লাইভ ডেটা টেনে আনা
+    const systemRef = window.fbRef(window.fbDatabase, 'rules/system');
+    window.fbOnValue(systemRef, (snapshot) => {
+        const data = snapshot.val();
+        tournamentSystems = [];
+        if (data) {
+            Object.keys(data).forEach(key => {
+                tournamentSystems.push({ id: key, bn: data[key].bn, en: data[key].en });
+            });
+        }
+        renderRules(); // ডেটা আসার সাথে সাথে স্ক্রিন রেন্ডার হবে
+    });
+}
 
 // ==========================================================================
 // ২. ভাষা ও হেডিং আপডেট লজিক
@@ -109,7 +149,7 @@ function updateInputFields() {
 }
 
 // ==========================================================================
-// ৪. নতুন নিয়ম যোগ এবং অটো-ট্রান্সলেশন লজিক
+// ৪. নতুন নিয়ম যোগ এবং ফায়ারবেস অনলাইন সেভ লজিক (আপডেট করা হয়েছে)
 // ==========================================================================
 async function addNewRule(type) {
     let inputId = (type === 'players') ? "new-rule-bn" : "new-sys-bn";
@@ -121,33 +161,42 @@ async function addNewRule(type) {
         const data = await res.json();
         let enTranslation = data.responseData.translatedText;
 
-        if (type === 'players') {
-            playersRules.push({ bn: bnInput, en: enTranslation });
-            localStorage.setItem("playersRules", JSON.stringify(playersRules));
-        } else {
-            tournamentSystems.push({ bn: bnInput, en: enTranslation });
-            localStorage.setItem("tournamentSystems", JSON.stringify(tournamentSystems));
-        }
-        document.getElementById(inputId).value = "";
-        renderRules();
-    } catch (error) {
-        alert("ট্রান্সলেশন করতে সমস্যা হয়েছে, অফলাইনে যোগ করা হচ্ছে।");
-    }
-}
-
-function deleteRule(type, index) {
-    if (confirm("আপনি কি এটি মুছে ফেলতে চান?")) {
-        if (type === 'players') playersRules.splice(index, 1);
-        else tournamentSystems.splice(index, 1);
+        // ফায়ারবেসের ইউনিক কি (Key) পুশ করার মাধ্যমে তৈরি করা
+        const newRef = window.fbPush(window.fbRef(window.fbDatabase, `rules/${type}`));
         
-        localStorage.setItem("playersRules", JSON.stringify(playersRules));
-        localStorage.setItem("tournamentSystems", JSON.stringify(tournamentSystems));
-        renderRules();
+        // ফায়ারবেস অনলাইনে ডেটা সেভ করা
+        window.fbSet(newRef, {
+            bn: bnInput,
+            en: enTranslation
+        }).then(() => {
+            document.getElementById(inputId).value = "";
+        }).catch((err) => {
+            alert("ফায়ারবেসে ডেটা সেভ করতে সমস্যা হয়েছে!");
+        });
+
+    } catch (error) {
+        alert("ট্রান্সলেশন করতে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।");
     }
 }
 
 // ==========================================================================
-// ৫. রেন্ডারিং ফাংশন
+// ৪.৫. ফায়ারবেস ক্লাউড থেকে ডিলিট করার লজিক (আপনার নোট অনুযায়ী আপডেট করা হয়েছে)
+// ==========================================================================
+function deleteRule(type, id) {
+    if (confirm("আপনি কি এটি ফায়ারবেস ডাটাবেজ এবং ওয়েবসাইট থেকে চিরতরে মুছে ফেলতে চান?")) {
+        // ফায়ারবেস থেকে আইডি ধরে রিমুভ করা হচ্ছে
+        window.fbRemove(window.fbRef(window.fbDatabase, `rules/${type}/${id}`))
+        .then(() => {
+            console.log("সফলভাবে অনলাইন থেকে ডিলিট করা হয়েছে।");
+        })
+        .catch((error) => {
+            alert("অনলাইন থেকে ডিলিট করতে সমস্যা হয়েছে: " + error.message);
+        });
+    }
+}
+
+// ==========================================================================
+// ৫. রেন্ডারিং ফাংশন (অনলাইন আইডি অনুযায়ী জেনারেট হবে)
 // ==========================================================================
 function renderRules() {
     const playersListUl = document.getElementById("players-rules-list");
@@ -159,21 +208,31 @@ function renderRules() {
     playersListUl.innerHTML = "";
     systemListUl.innerHTML = "";
 
-    playersRules.forEach((rule, index) => {
+    // প্লেয়ার রুল রেন্ডার
+    playersRules.forEach((rule) => {
         const li = document.createElement("li");
         li.textContent = currentLanguage === "bn" ? rule.bn : rule.en;
         if (isAdmin) {
-            li.innerHTML += ` <button class="delete-rule-btn" onclick="deleteRule('players', ${index})"><i class="fas fa-trash"></i></button>`;
+            // এখানে ডিলিট ফাংশনে এখন ইনডেক্সের বদলে ইউনিক ফায়ারবেস আইডি (`rule.id`) পাঠানো হচ্ছে
+            li.innerHTML += ` <button class="delete-rule-btn" onclick="deleteRule('players', '${rule.id}')"><i class="fas fa-trash"></i></button>`;
         }
         playersListUl.appendChild(li);
     });
 
-    tournamentSystems.forEach((sys, index) => {
+    // টুর্নামেন্ট সিস্টেম রেন্ডার
+    tournamentSystems.forEach((sys) => {
         const li = document.createElement("li");
         li.textContent = currentLanguage === "bn" ? sys.bn : sys.en;
         if (isAdmin) {
-            li.innerHTML += ` <button class="delete-rule-btn" onclick="deleteRule('system', ${index})"><i class="fas fa-trash"></i></button>`;
+            // ইউনিক ফায়ারবেস আইডি (`sys.id`) পাঠানো হচ্ছে
+            li.innerHTML += ` <button class="delete-rule-btn" onclick="deleteRule('system', '${sys.id}')"><i class="fas fa-trash"></i></button>`;
         }
         systemListUl.appendChild(li);
     });
 }
+
+// গ্লোবাল স্কোপে ফাংশন দুটি রাখার জন্য উইন্ডোতে ডিক্লেয়ার করা হলো যেন HTML থেকে বাটন ট্রিপ করতে পারে
+window.addNewRule = addNewRule;
+window.deleteRule = deleteRule;
+window.toggleLanguage = toggleLanguage;
+window.handleAdminAuth = handleAdminAuth;

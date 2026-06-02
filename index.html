@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
     
-    <!-- লোগোর সাইজ বাড়িয়ে পজিশন আপডেট করা হয়েছে -->
+    <!-- লোগোর সাইজ বাড়িয়ে পজিশন আপডেট করা হয়েছে -->
     <style>
         .main-header {
             position: relative; /* লোগোকে এটার সাপেক্ষে বামে বসানোর জন্য */
@@ -16,24 +16,24 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 20px 0; /* হেডারের ভেতরের স্পেস একটু বাড়ানো হলো */
+            padding: 20px 0; /* হেডারের ভেতরের স্পেস একটু বাড়ানো হলো */
         }
 
         /* লোগো কন্টেইনার স্টাইল */
         .top-header-logo-container {
             position: absolute;
-            left: 40px; /* বাম কোণা থেকে গ্যাপ সামান্য বাড়ানো হলো যেন সুন্দর লাগে */
+            left: 40px; /* বাম কোণা থেকে গ্যাপ সামান্য বাড়ানো হলো যেন সুন্দর লাগে */
             top: 50%;
             transform: translateY(-50%); /* লম্বালম্বি একদম মাঝখানে রাখবে */
             z-index: 10;
         }
 
-        /* লোগো ইমেজ সাইজ ও গেমিং ইফেক্ট (সাইজ বড় করা হয়েছে) */
+        /* লোগো ইমেজ সাইজ ও গেমিং ইফেক্ট (সাইজ বড় করা হয়েছে) */
         .top-header-logo {
-            height: 110px; /* লোগোটি এখন বেশ বড় এবং স্পষ্ট দেখাবে */
+            height: 110px; /* লোগোটি এখন বেশ বড় এবং স্পষ্ট দেখাবে */
             width: auto;
             object-fit: contain;
-            filter: drop-shadow(0px 0px 10px rgba(255, 68, 68, 0.4)); /* গ্লো ইফেক্ট আরেকটু বাড়ানো হলো */
+            filter: drop-shadow(0px 0px 10px rgba(255, 68, 68, 0.4)); /* গ্লো ইফেক্ট আরেকটু বাড়ানো হলো */
             transition: all 0.3s ease;
         }
 
@@ -47,7 +47,7 @@
         /* ছোট স্ক্রিন বা মোবাইলের জন্য রেসপনসিভ ডিজাইন */
         @media (max-width: 768px) {
             .main-header {
-                padding-top: 130px; /* মোবাইলে লোগো বড় হওয়ার কারণে ওপরের স্পেস বাড়ানো হলো */
+                padding-top: 130px; /* মোবাইলে লোগো বড় হওয়ার কারণে ওপরের স্পেস বাড়ানো হলো */
             }
             .top-header-logo-container {
                 left: 50%;
@@ -55,7 +55,7 @@
                 transform: translateX(-50%); /* মোবাইলে লোগোটি উপরে মাঝখানে চলে আসবে */
             }
             .top-header-logo {
-                height: 80px; /* মোবাইলের স্ক্রিন অনুযায়ী সাইজ */
+                height: 80px; /* মোবাইলের স্ক্রিন অনুযায়ী সাইজ */
             }
         }
     </style>
@@ -131,6 +131,37 @@
         </div>
     </footer>
 
-    <script src="script.js"></script>
+    <!-- ফায়ারবেস স্ক্রিপ্ট কানেকশন (নতুন যোগ করা হয়েছে) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getDatabase, ref, set, onValue, remove, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+        // আপনার প্রজেক্টের রিয়েল ফায়ারবেস কনফিগারেশন
+        const firebaseConfig = {
+            apiKey: "AIzaSyBa871lgRrjzlam5NYmFds4HiJenveeH58",
+            authDomain: "efootball-hub-db8a1.firebaseapp.com",
+            databaseURL: "https://efootball-hub-db8a1-default-rtdb.firebaseio.com",
+            projectId: "efootball-hub-db8a1",
+            storageBucket: "efootball-hub-db8a1.firebasestorage.app",
+            messagingSenderId: "921691338387",
+            appId: "1:921691338387:web:a0c9178a21bea652db7f66",
+            measurementId: "G-D45QZLRRPL"
+        };
+
+        // ইনিশিয়ালাইজেশন
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // ফাংশনগুলোকে গ্লোবাল উইন্ডো অবজেক্টে সেট করা হলো যেন script.js সহজে পায়
+        window.fbDatabase = database;
+        window.fbRef = ref;
+        window.fbSet = set;
+        window.fbOnValue = onValue;
+        window.fbRemove = remove;
+        window.fbPush = push;
+    </script>
+
+    <!-- আপনার মূল স্ক্রিপ্ট ফাইলটি মডিউল হিসেবে কল করা হলো -->
+    <script type="module" src="script.js"></script>
 </body>
 </html>
