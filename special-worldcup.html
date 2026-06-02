@@ -164,6 +164,37 @@
         </div>
     </div>
 
-    <script src="special-worldcup-script.js"></script>
+    <!-- ফায়ারবেস মডিউল কানেকশন -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getDatabase, ref, set, onValue, remove, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+        // ফায়ারবেস কনফিগারেশন
+        const firebaseConfig = {
+            apiKey: "AIzaSyBa871lgRrjzlam5NYmFds4HiJenveeH58",
+            authDomain: "efootball-hub-db8a1.firebaseapp.com",
+            databaseURL: "https://efootball-hub-db8a1-default-rtdb.firebaseio.com",
+            projectId: "efootball-hub-db8a1",
+            storageBucket: "efootball-hub-db8a1.firebasestorage.app",
+            messagingSenderId: "921691338387",
+            appId: "1:921691338387:web:a0c9178a21bea652db7f66",
+            measurementId: "G-D45QZLRRPL"
+        };
+
+        // ইনিশিয়ালাইজেশন
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // গ্লোবাল উইন্ডো অবজেক্ট প্রোপার্টিজ সেটআপ
+        window.fbDatabase = database;
+        window.fbRef = ref;
+        window.fbSet = set;
+        window.fbOnValue = onValue;
+        window.fbRemove = remove;
+        window.fbPush = push;
+    </script>
+
+    <!-- স্পেশাল ওয়ার্ল্ড কাপের মডিউল স্ক্রিপ্ট ফাইল -->
+    <script type="module" src="special-worldcup-script.js"></script>
 </body>
 </html>

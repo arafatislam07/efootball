@@ -691,72 +691,73 @@ function saveMatchResult() {
 }
 
 // ==========================================================================
-// 🏆 ৮. লাইভ টুর্নামেন্ট রেজাল্ট এবং টপ স্কোরার ENGINE (পেনাল্টি গোল ছাড়া)
+// ৬. অ্যাডমিন স্কোর মডাল পপ-আপ কন্ট্রোল (Special World Cup - ফায়ারবেস সহ আপডেটেড)
 // ==========================================================================
-function calculateWcLiveResults() {
-    const wc = wcTournaments.find(w => w.id === currentWcId);
-    if (!wc) return;
-
-    document.getElementById("live-champ-prize").textContent = "Prize: ৳" + wc.prizes.first;
-    document.getElementById("live-runner-prize").textContent = "Prize: ৳" + wc.prizes.second;
-    document.getElementById("live-scorer-prize").textContent = "Prize: ৳" + wc.prizes.scorer;
-
-    const champBox = document.getElementById("live-champion-box");
-    const runnerBox = document.getElementById("live-runnerup-box");
-    const scorerBox = document.getElementById("live-topscorer-box");
-
-    let goalStats = {};
-    wc.players.forEach(p => goalStats[p] = { name: p, goals: 0 });
-
-    let playedCount = 0;
-    let finalMatch = null;
-
-    wc.fixtures.forEach(f => {
-        if (f.stage === "Final") finalMatch = f.matches[0];
-        f.matches.forEach(m => {
-            if (m.played) {
-                playedCount++;
-                if (goalStats[m.home]) goalStats[m.home].goals += parseInt(m.homeScore);
-                if (goalStats[m.away]) goalStats[m.away].goals += parseInt(m.awayScore);
-            }
-        });
+function openScoreModal(matchId) {
+    // এখানে আপনার স্পেশাল ওয়ার্ল্ড কাপের গ্লোবাল ভ্যারিয়েবলের নাম অনুযায়ী (ধরি specialWorldCups বা worldCups) চেঞ্জ হতে পারে। 
+    // যদি ভ্যারিয়েবলের নাম শুধু leagues-ই রেখে থাকেন, তবে যা আছে তাই থাকবে।
+    const league = leagues.find(l => l.id === currentLeagueId);
+    let foundMatch = null;
+    league.fixtures.forEach(f => {
+        let m = f.matches.find(match => match.id === matchId);
+        if (m) foundMatch = m;
     });
 
-    if (playedCount === 0) {
-        let empty = `<span class="no-data-text"><i class="fas fa-hourglass-start"></i> No matches played yet</span>`;
-        champBox.innerHTML = empty; runnerBox.innerHTML = empty; scorerBox.innerHTML = empty;
-        return;
-    }
+    if (!foundMatch) return;
+    currentEditingMatch = foundMatch;
 
-    if (finalMatch && finalMatch.played) {
-        let winner = finalMatch.homeScore > finalMatch.awayScore ? finalMatch.home : finalMatch.away;
-        let runner = finalMatch.homeScore > finalMatch.awayScore ? finalMatch.away : finalMatch.home;
-        if (finalMatch.homeScore === finalMatch.awayScore) {
-            winner = finalMatch.homePenalty > finalMatch.awayPenalty ? finalMatch.home : finalMatch.away;
-            runner = finalMatch.homePenalty > finalMatch.awayPenalty ? finalMatch.away : finalMatch.home;
+    document.getElementById("modal-teamA-name").textContent = foundMatch.home;
+    document.getElementById("modal-teamB-name").textContent = foundMatch.away;
+    document.getElementById("modal-teamA-score").value = foundMatch.homeScore !== null ? foundMatch.homeScore : "";
+    document.getElementById("modal-teamB-score").value = foundMatch.awayScore !== null ? foundMatch.awayScore : "";
+    document.getElementById("modal-teamA-poss").value = foundMatch.homePoss !== null ? foundMatch.homePoss : "";
+    document.getElementById("modal-teamB-poss").value = foundMatch.awayPoss !== null ? foundMatch.awayPoss : "";
+
+    document.getElementById("score-modal").style.display = "flex";
+}
+
+function closeScoreModal() {
+    document.getElementById("score-modal").style.display = "none";
+    currentEditingMatch = null;
+}
+
+function saveMatchResult() {
+    if (!currentEditingMatch) return;
+
+    const hs = document.getElementById("modal-teamA-score").value;
+    const as = document.getElementById("modal-teamB-score").value;
+    const hp = document.getElementById("modal-teamA-poss").value;
+    const ap = document.getElementById("modal-teamB-poss").value;
+
+    if (hs === "" || as === "") { alert("দয়া করে দুই দলেরই গোল সংখ্যা ইনপুট দিন!"); return; }
+    if (hp !== "" || ap !== "") {
+        if (parseInt(hp) + parseInt(ap) !== 100) {
+            alert("ভুল ইনপুট! দুই দলের বল পজিশন যোগ করলে অবশ্যই ১০০% হতে হবে।");
+            return;
         }
-
-        champBox.innerHTML = `<span class="winner-name" style="color:#ffd700; font-weight:bold;"><i class="fas fa-trophy"></i> ${winner}</span>`;
-        runnerBox.innerHTML = `<span class="winner-name" style="color:#c0c0c0; font-weight:bold;"><i class="fas fa-medal"></i> ${runner}</span>`;
-    } else {
-        champBox.innerHTML = `<span class="winner-name" style="font-size:1.1rem; color:#ffd700;"><i class="fas fa-spinner fa-spin"></i> Tournament Live...</span>`;
-        runnerBox.innerHTML = `<span class="winner-name" style="font-size:1.1rem; color:#c0c0c0;"><i class="fas fa-spinner fa-spin"></i> Tournament Live...</span>`;
     }
 
-    let sortedScorers = Object.values(goalStats).sort((a,b) => b.goals - a.goals);
-    let topScorer = sortedScorers[0];
+    currentEditingMatch.homeScore = parseInt(hs);
+    currentEditingMatch.awayScore = parseInt(as);
+    currentEditingMatch.homePoss = hp !== "" ? parseInt(hp) : 0;
+    currentEditingMatch.awayPoss = ap !== "" ? parseInt(ap) : 0;
+    currentEditingMatch.played = true;
 
-    if (topScorer && topScorer.goals > 0) {
-        let nation = wc.playerNations[topScorer.name] || "TBD";
-        let jStyle = NAT_JERSEY_STYLES[nation] || { color: "#fff" };
-        scorerBox.innerHTML = `
-            <div class="result-identity-row" style="display:flex; align-items:center; gap:8px; justify-content:center;">
-                <i class="fas fa-tshirt" style="color: ${jStyle.color}; font-size: 1.2rem;"></i>
-                <span class="winner-name" style="font-weight:bold;">${topScorer.name}</span>
-            </div>
-            <div class="winner-meta-sub" style="color:#ff7b72; font-weight:bold; margin-top:5px;"><i class="fas fa-futbol"></i> Total Goals: ${topScorer.goals}</div>
-        `;
-    } else {
-        scorerBox.innerHTML = `<span class="no-data-text">No goals scored yet</span>`;
+    // ১. লোকাল স্টোরেজে স্পেশাল ওয়ার্ল্ড কাপের আলাদা কি (Key) তে সেভ রাখা হলো
+    localStorage.setItem("efootballSpecialWorldCup", JSON.stringify(leagues));
+
+    // ২. ফায়ারবেস রিয়েল-টাইম ডাটাবেজে ক্লাউড আপডেট পুশ (পাথ পরিবর্তন করা হয়েছে)
+    if (window.fbSet && window.fbRef && window.fbDatabase) {
+        // 'leagues' এর পরিবর্তে এখানে 'special_worldcup' পাথে ডেটা সেভ হবে যেন লীগের ডেটা ডিলিট না হয়
+        window.fbSet(window.fbRef(window.fbDatabase, 'special_worldcup'), leagues)
+        .then(() => {
+            console.log("স্পেশাল ওয়ার্ল্ড কাপের স্কোর ফায়ারবেসে সফলভাবে সিঙ্ক হয়েছে!");
+        })
+        .catch((err) => {
+            console.error("ফায়ারবেস আপডেট এরর:", err);
+        });
     }
+
+    closeScoreModal();
+    renderFixtures();
 }

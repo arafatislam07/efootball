@@ -692,7 +692,7 @@ function saveMatchResult() {
 }
 
 // ==========================================================================
-// 🏆 ৮. লাইভ টুর্নামেন্ট রেজাল্ট এবং টপ স্কোরার ENGINE
+// 🏆 ৮. লাইভ টুর্নামেন্ট রেজাল্ট এবং টপ স্কোরার ENGINE (Standard World Cup - ফায়ারবেস সহ আপডেটেড)
 // ==========================================================================
 function calculateWcLiveResults() {
     const wc = wcTournaments.find(w => w.id === currentWcId);
@@ -759,5 +759,12 @@ function calculateWcLiveResults() {
         `;
     } else {
         scorerBox.innerHTML = `<span class="no-data-text">No goals scored yet</span>`;
+    }
+
+    // [নতুন ফায়ারবেস ইন্টিগ্রেশন]: লাইভ স্কোর বা রেজাল্ট আপডেট হলে তা স্ট্যান্ডার্ড ওয়ার্ল্ডকাপ পাথে অটো-সিঙ্ক হবে
+    if (window.fbSet && window.fbRef && window.fbDatabase) {
+        window.fbSet(window.fbRef(window.fbDatabase, 'standard_worldcup'), wcTournaments)
+        .then(() => console.log("স্ট্যান্ডার্ড ওয়ার্ল্ড কাপ লাইভ ডেটা ফায়ারবেসে সিঙ্ক হয়েছে!"))
+        .catch(err => console.error("ফায়ারবেস সিঙ্ক এরর:", err));
     }
 }

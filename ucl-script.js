@@ -733,9 +733,8 @@ function saveMatchResult() {
     if (grid && grid.style.display === "block") calculateWcGroups();
     else renderWcFixtures();
 }
-
 // ==========================================================================
-// 🏆 ৮. লাইভ টুর্নামেন্ট রেজাল্ট এবং টপ স্কোরার ENGINE (পেনাল্টি গোল ছাড়া)
+// 🏆 ৮. লাইভ টুর্নামেন্ট রেজাল্ট এবং টপ স্কোরার ENGINE (UCL Mode - ফায়ারবেস সহ আপডেটেড)
 // ==========================================================================
 function calculateWcLiveResults() {
     const wc = wcTournaments.find(w => w.id === currentWcId);
@@ -802,5 +801,12 @@ function calculateWcLiveResults() {
         `;
     } else {
         scorerBox.innerHTML = `<span class="no-data-text">No goals scored yet</span>`;
+    }
+
+    // [নতুন ফায়ারবেস ইন্টিগ্রেশন]: UCL মোডের লাইভ ডেটা ক্লাউড ডাটাবেজে অটো-সিঙ্ক করার লজিক
+    if (window.fbSet && window.fbRef && window.fbDatabase) {
+        window.fbSet(window.fbRef(window.fbDatabase, 'ucl_mode'), wcTournaments)
+        .then(() => console.log("UCL লাইভ ডেটা ফায়ারবেসে সফলভাবে সিঙ্ক হয়েছে!"))
+        .catch(err => console.error("ফায়ারবেস সিঙ্ক এরর (UCL):", err));
     }
 }

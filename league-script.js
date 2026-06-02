@@ -559,7 +559,7 @@ function renderFixtures() {
 }
 
 // ==========================================================================
-// ৬. অ্যাডমিন স্কোর মডাল পপ-আপ কন্ট্রোল
+// ৬. অ্যাডমিন স্কোর মডাল পপ-আপ কন্ট্রোল (ফায়ারবেস সহ আপডেটেড)
 // ==========================================================================
 function openScoreModal(matchId) {
     const league = leagues.find(l => l.id === currentLeagueId);
@@ -609,7 +609,20 @@ function saveMatchResult() {
     currentEditingMatch.awayPoss = ap !== "" ? parseInt(ap) : 0;
     currentEditingMatch.played = true;
 
+    // ১. লোকাল স্টোরেজে ব্যাকআপ হিসেবে সেভ রাখা হলো
     localStorage.setItem("efootballLeagues", JSON.stringify(leagues));
+
+    // ২. ফায়ারবেস রিয়েল-টাইম ডাটাবেজে ক্লাউড আপডেট পুশ (নতুন যোগ করা হয়েছে)
+    if (window.fbSet && window.fbRef && window.fbDatabase) {
+        window.fbSet(window.fbRef(window.fbDatabase, 'leagues'), leagues)
+        .then(() => {
+            console.log("ম্যাচের স্কোর ফায়ারবেসে সফলভাবে সিঙ্ক হয়েছে!");
+        })
+        .catch((err) => {
+            console.error("ফায়ারবেস আপডেট এরর:", err);
+        });
+    }
+
     closeScoreModal();
     renderFixtures();
 }
