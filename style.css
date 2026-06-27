@@ -6,8 +6,8 @@
 }
 
 body {
-    background-color: #0d1117;
-    color: #c9d1d9;
+    background-color: #000000; /* একদম কুচকুচে ডার্ক ব্ল্যাক ব্যাকগ্রাউন্ড */
+    color: #ffffff;            /* সব জেনারেল টেক্সট পিওর সাদা */
     line-height: 1.6;
     padding-bottom: 80px;
 }
@@ -19,15 +19,15 @@ body {
 }
 
 .main-header {
-    background: linear-gradient(135deg, #1f2937, #111827);
+    background: #121212; /* হালকা কালো চারকোল শেড বার */
     text-align: center;
     padding: 40px 20px;
     border-bottom: 3px solid #1f6feb;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.8);
 }
 
 .main-header h1 {
-    color: #58a6ff;
+    color: #ffffff; /* হেডিং টেক্সট পিওর সাদা */
     font-size: 2.5rem;
     margin-bottom: 10px;
     text-transform: uppercase;
@@ -40,14 +40,14 @@ body {
 }
 
 .main-header p {
-    color: #8b949e;
+    color: #ffffff; /* সাবটাইটেল টেক্সট পিওর সাদা */
     font-size: 1.1rem;
 }
 
 .section-title {
     text-align: center;
     margin: 40px 0 20px;
-    color: #ffffff;
+    color: #ffffff; /* পিওর সাদা */
     font-size: 1.8rem;
 }
 
@@ -59,8 +59,8 @@ body {
 }
 
 .mode-card {
-    background-color: #161b22;
-    border: 1px solid #30363d;
+    background-color: #121212; /* হালকা কালো চারকোল শেড কার্ড */
+    border: 1px solid #222222; /* হালকা বর্ডার */
     border-radius: 12px;
     padding: 30px 20px;
     text-align: center;
@@ -74,27 +74,27 @@ body {
     box-shadow: 0 8px 25px rgba(88, 166, 255, 0.2);
 }
 
-/* রিয়াল আইকনগুলোর স্পেশাল সাইজ */
+/* রিয়াল আইকনগুলোর স্পেশাল সাইজ */
 .mode-icon {
     font-size: 3.5rem;
     margin-bottom: 15px;
 }
 
 .mode-card h3 {
-    color: #ffffff;
+    color: #ffffff; /* পিওর সাদা */
     margin-bottom: 10px;
     font-size: 1.4rem;
 }
 
 .mode-card p {
-    color: #8b949e;
+    color: #ffffff; /* ডেসক্রিপশন টেক্সট পিওর সাদা */
     font-size: 0.95rem;
 }
 
 .divider {
     border: 0;
     height: 1px;
-    background: #30363d;
+    background: #222222;
     margin: 40px 0;
 }
 
@@ -135,29 +135,29 @@ body {
 }
 
 .info-box {
-    background-color: #161b22;
-    border: 1px solid #30363d;
+    background-color: #121212; /* হালকা কালো চারকোল শেড বক্স */
+    border: 1px solid #222222;
     border-radius: 12px;
     padding: 25px;
     position: relative;
 }
 
 .info-box h3 {
-    color: #ffa657; /* সুন্দর অরেঞ্জ ভাইব শিরোনাম */
+    color: #ffffff; /* শিরোনাম পিওর সাদা */
     margin-bottom: 15px;
-    border-bottom: 2px solid #30363d;
+    border-bottom: 2px solid #222222;
     padding-bottom: 8px;
     font-size: 1.3rem;
 }
 
-/* ওএল (OL) এর মাধ্যমে অটোমেটিক সিরিয়াল নম্বর ১,২,৩ বসার স্টাইল */
+/* ওএল (OL) এর মাধ্যমে অটোমেটিক সিরিয়াল নম্বর ১,২,৩ বসার স্টাইল */
 .dynamic-list {
     padding-left: 20px;
 }
 
 .dynamic-list li {
     margin-bottom: 15px;
-    color: #c9d1d9;
+    color: #ffffff; /* লিস্টের টেক্সট পিওর সাদা */
     font-size: 1rem;
     position: relative;
 }
@@ -182,22 +182,22 @@ body {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    background-color: #0d1117;
+    background-color: #000000; /* ইনপুট প্যানেল ব্যাকগ্রাউন্ড ডার্ক ব্ল্যাক */
     padding: 15px;
     border-radius: 8px;
-    border: 1px dashed #30363d;
+    border: 1px dashed #222222;
 }
 
 .admin-only-actions input {
-    background-color: #161b22;
-    border: 1px solid #30363d;
+    background-color: #121212;
+    border: 1px solid #222222;
     color: #ffffff;
     padding: 8px;
     border-radius: 6px;
 }
 
 .admin-only-actions button {
-    background-color: #238636; /* সবুজ বাটন */
+    background-color: #238636;
     color: white;
     border: none;
     padding: 8px;
@@ -218,17 +218,17 @@ body {
     bottom: 0;
     left: 0;
     width: 100%;
-    background-color: #0d1117;
+    background-color: #000000; /* ফুটার বার একদম কুচকুচে কালো */
     padding: 15px 20px;
     text-align: right;
-    border-top: 1px solid #30363d;
+    border-top: 1px solid #222222;
     z-index: 1000;
 }
 
 #admin-login-btn {
-    background-color: #21262d;
-    color: #c9d1d9;
-    border: 1px solid #30363d;
+    background-color: #121212; /* বাটন হালকা কালো */
+    color: #ffffff;            /* টেক্সট পিওর সাদা */
+    border: 1px solid #222222;
     padding: 8px 16px;
     border-radius: 6px;
     font-size: 0.9rem;

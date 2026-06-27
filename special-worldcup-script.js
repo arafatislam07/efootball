@@ -30,7 +30,41 @@ const WEEK_DAYS_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 window.onload = function() {
     renderWcList();
     updateWcAdminUI();
+    // ফায়ারবেস থেকে লাইভ স্পেশাল ওয়ার্ল্ড কাপ ডেটা সিঙ্ক করার ইঞ্জিন
+    listenToFirebaseSpecialWc();
 };
+
+// ==========================================================================
+// ১.৫ ফায়ারবেস লাইভ ডেটা লিসেনার ইঞ্জিন (جديد যুক্ত করা হয়েছে)
+// ==========================================================================
+function listenToFirebaseSpecialWc() {
+    if (!window.fbDatabase || !window.fbOnValue || !window.fbRef) {
+        console.error("Firebase কনফিগারেশন এখনো লোড হয়নি।");
+        return;
+    }
+
+    const specialWcRef = window.fbRef(window.fbDatabase, 'special_worldcup');
+    window.fbOnValue(specialWcRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            wcTournaments = Array.isArray(data) ? data : Object.values(data);
+        } else {
+            wcTournaments = [];
+        }
+        localStorage.setItem("efootballSpecialWorldCups", JSON.stringify(wcTournaments));
+        
+        if (currentWcId) {
+            const currentTab = document.querySelector(".tab-btn.active");
+            if (currentTab) {
+                if (currentTab.id === "tab-table-btn") calculateWcGroups();
+                else if (currentTab.id === "tab-matches-btn") renderWcFixtures();
+                else if (currentTab.id === "tab-result-btn") calculateWcLiveResults();
+            }
+        } else {
+            renderWcList();
+        }
+    });
+}
 
 function updateWcAdminUI() {
     const indicator = document.getElementById("admin-indicator");
@@ -89,7 +123,7 @@ function toggleCreateForm() {
 }
 
 // ==========================================================================
-// ২. ৪৮ দল ফিফা ২০ ২৬ ফরম্যাট জেনারেশন ENGINE (দিনে সর্বোচ্চ ৮টি ম্যাচ)
+// ২. ৪৮ দল ফিফা ২০২৬ ফরম্যাট জেনারেশন ENGINE (দিনে সর্বোচ্চ ৮টি ম্যাচ)
 // ==========================================================================
 function generateSpecialWorldCup() {
     const name = document.getElementById("wc-name-input").value.trim();
@@ -247,6 +281,9 @@ function generateSpecialWorldCup() {
     };
 
     wcTournaments.push(newWc);
+    if (window.fbSet && window.fbRef && window.fbDatabase) {
+        window.fbSet(window.fbRef(window.fbDatabase, 'special_worldcup'), wcTournaments);
+    }
     localStorage.setItem("efootballSpecialWorldCups", JSON.stringify(wcTournaments));
     toggleCreateForm();
     renderWcList();
@@ -298,6 +335,9 @@ function renderWcList() {
                 e.stopPropagation();
                 if(confirm("এই স্পেশাল বিশ্বকাপটি ডিলিট করতে চান?")) {
                     wcTournaments = wcTournaments.filter(w => w.id !== wc.id);
+                    if (window.fbSet && window.fbRef && window.fbDatabase) {
+                        window.fbSet(window.fbRef(window.fbDatabase, 'special_worldcup'), wcTournaments);
+                    }
                     localStorage.setItem("efootballSpecialWorldCups", JSON.stringify(wcTournaments));
                     renderWcList();
                 }
@@ -343,17 +383,25 @@ function switchWcTab(tab) {
     const matchesContent = document.getElementById("tab-matches-content");
     const resultContent = document.getElementById("tab-result-content");
 
-    tableBtn.classList.remove("active"); matchesBtn.classList.remove("active"); resultBtn.classList.remove("active");
-    tableContent.style.display = "none"; matchesContent.style.display = "none"; resultContent.style.display = "none";
+    if(tableBtn) tableBtn.classList.remove("active"); 
+    if(matchesBtn) matchesBtn.classList.remove("active"); 
+    if(resultBtn) resultBtn.classList.remove("active");
+    
+    if(tableContent) tableContent.style.display = "none"; 
+    if(matchesContent) matchesContent.style.display = "none"; 
+    if(resultContent) resultContent.style.display = "none";
 
     if (tab === 'table') {
-        tableBtn.classList.add("active"); tableContent.style.display = "block";
+        if(tableBtn) tableBtn.classList.add("active"); 
+        if(tableContent) tableContent.style.display = "block";
         calculateWcGroups();
     } else if (tab === 'matches') {
-        matchesBtn.classList.add("active"); matchesContent.style.display = "block";
+        if(matchesBtn) matchesBtn.classList.add("active"); 
+        if(matchesContent) matchesContent.style.display = "block";
         renderWcFixtures();
     } else {
-        resultBtn.classList.add("active"); resultContent.style.display = "block";
+        if(resultBtn) resultBtn.classList.add("active"); 
+        if(resultContent) resultContent.style.display = "block";
         calculateWcLiveResults();
     }
 }
@@ -366,6 +414,7 @@ function calculateWcGroups() {
     if (!wc) return;
 
     const container = document.getElementById("tab-table-content");
+    if(!container) return;
     container.innerHTML = "";
 
     Object.keys(wc.groups).forEach(gLetter => {
@@ -381,18 +430,20 @@ function calculateWcGroups() {
                         let hs = parseInt(m.homeScore); let as = parseInt(m.awayScore);
                         let hp = parseFloat(m.homePoss || 0); let ap = parseFloat(m.awayPoss || 0);
 
-                        stats[h].p++; stats[a].p++;
-                        stats[h].gf += hs; stats[h].ga += as;
-                        stats[a].gf += as; stats[a].ga += hs;
+                        if(stats[h] && stats[a]) {
+                            stats[h].p++; stats[a].p++;
+                            stats[h].gf += hs; stats[h].ga += as;
+                            stats[a].gf += as; stats[a].ga += hs;
 
-                        if (hp > 0 || ap > 0) {
-                            stats[h].totalPoss += hp; stats[h].playedWithPoss++;
-                            stats[a].totalPoss += ap; stats[a].playedWithPoss++;
+                            if (hp > 0 || ap > 0) {
+                                stats[h].totalPoss += hp; stats[h].playedWithPoss++;
+                                stats[a].totalPoss += ap; stats[a].playedWithPoss++;
+                            }
+
+                            if (hs > as) { stats[h].w++; stats[h].pts += 3; stats[a].l++; }
+                            else if (hs < as) { stats[a].w++; stats[a].pts += 3; stats[h].l++; }
+                            else { stats[h].d++; stats[h].pts += 1; stats[a].d++; stats[a].pts += 1; }
                         }
-
-                        if (hs > as) { stats[h].w++; stats[h].pts += 3; stats[a].l++; }
-                        else if (hs < as) { stats[a].w++; stats[a].pts += 3; stats[h].l++; }
-                        else { stats[h].d++; stats[h].pts += 1; stats[a].d++; stats[a].pts += 1; }
                     }
                 });
             }
@@ -476,63 +527,65 @@ function renderWcFixtures() {
         container.appendChild(block);
 
         const grid = document.getElementById(`round-grid-${f.matchday}`);
-        f.matches.forEach(m => {
-            const card = document.createElement("div");
-            card.className = "match-card"; 
-            card.style.background = "#161b22";
-            card.style.padding = "15px";
-            card.style.borderRadius = "8px";
-            card.style.border = m.played ? "1px solid #238636" : "1px solid #21262d";
-            card.style.display = "flex";
-            card.style.justifyContent = "space-between";
-            card.style.alignItems = "center";
+        if(grid) {
+            f.matches.forEach(m => {
+                const card = document.createElement("div");
+                card.className = "match-card"; 
+                card.style.background = "#161b22";
+                card.style.padding = "15px";
+                card.style.borderRadius = "8px";
+                card.style.border = m.played ? "1px solid #238636" : "1px solid #21262d";
+                card.style.display = "flex";
+                card.style.justifyContent = "space-between";
+                card.style.alignItems = "center";
 
-            let homeNat = wc.playerNations[m.home] || "TBD";
-            let awayNat = wc.playerNations[m.away] || "TBD";
-            let jHome = NAT_JERSEY_STYLES[homeNat] || { color: "#fff" };
-            let jAway = NAT_JERSEY_STYLES[awayNat] || { color: "#fff" };
+                let homeNat = wc.playerNations[m.home] || "TBD";
+                let awayNat = wc.playerNations[m.away] || "TBD";
+                let jHome = NAT_JERSEY_STYLES[homeNat] || { color: "#fff" };
+                let jAway = NAT_JERSEY_STYLES[awayNat] || { color: "#fff" };
 
-            let hScoreText = m.played ? m.homeScore : "-";
-            let aScoreText = m.played ? m.awayScore : "-";
-            
-            if (m.played && m.homePenalty !== null && m.awayPenalty !== null) {
-                hScoreText += ` (${m.homePenalty})`;
-                aScoreText += ` (${m.awayPenalty})`;
-            }
+                let hScoreText = m.played ? m.homeScore : "-";
+                let aScoreText = m.played ? m.awayScore : "-";
+                
+                if (m.played && m.homePenalty !== null && m.awayPenalty !== null) {
+                    hScoreText += ` (${m.homePenalty})`;
+                    aScoreText += ` (${m.awayPenalty})`;
+                }
 
-            let pA = m.played ? `${m.homePoss}%` : "";
-            let pB = m.played ? `${m.awayPoss}%` : "";
+                let pA = m.played ? `${m.homePoss}%` : "";
+                let pB = m.played ? `${m.awayPoss}%` : "";
 
-            card.innerHTML = `
-                <div class="match-teams-block" style="display:flex; flex-direction:column; gap:12px; flex-grow:1;">
-                    <div class="team-row-node" style="display:flex; justify-content:space-between; align-items:center;">
-                        <div class="team-identity-wrapper" style="display:flex; align-items:center; gap:10px;">
-                            <i class="fas fa-tshirt" style="color: ${jHome.color} !important; text-shadow: ${jHome.textShadow} !important; font-size:1.1rem;"></i>
-                            <span class="team-player-name" style="font-weight:600; color:${m.home === 'TBD' ? '#8b949e' : '#c9d1d9'}">${m.home}</span>
+                card.innerHTML = `
+                    <div class="match-teams-block" style="display:flex; flex-direction:column; gap:12px; flex-grow:1;">
+                        <div class="team-row-node" style="display:flex; justify-content:space-between; align-items:center;">
+                            <div class="team-identity-wrapper" style="display:flex; align-items:center; gap:10px;">
+                                <i class="fas fa-tshirt" style="color: ${jHome.color} !important; text-shadow: ${jHome.textShadow} !important; font-size:1.1rem;"></i>
+                                <span class="team-player-name" style="font-weight:600; color:${m.home === 'TBD' ? '#8b949e' : '#c9d1d9'}">${m.home}</span>
+                            </div>
+                            <div class="team-score-wrapper" style="display:flex; gap:15px; align-items:center;">
+                                <span class="team-poss-pct" style="font-size:0.75rem; color:#8b949e; min-width:35px; text-align:right;">${pA}</span>
+                                <span class="team-goals-num" style="font-weight:bold; font-size:1.1rem; color:#58a6ff; min-width:15px; text-align:right;">${hScoreText}</span>
+                            </div>
                         </div>
-                        <div class="team-score-wrapper" style="display:flex; gap:15px; align-items:center;">
-                            <span class="team-poss-pct" style="font-size:0.75rem; color:#8b949e; min-width:35px; text-align:right;">${pA}</span>
-                            <span class="team-goals-num" style="font-weight:bold; font-size:1.1rem; color:#58a6ff; min-width:15px; text-align:right;">${hScoreText}</span>
+                        <div class="team-row-node" style="display:flex; justify-content:space-between; align-items:center;">
+                            <div class="team-identity-wrapper" style="display:flex; align-items:center; gap:10px;">
+                                <i class="fas fa-tshirt" style="color: ${jAway.color} !important; text-shadow: ${jAway.textShadow} !important; font-size:1.1rem;"></i>
+                                <span class="team-player-name" style="font-weight:600; color:${m.away === 'TBD' ? '#8b949e' : '#c9d1d9'}">${m.away}</span>
+                            </div>
+                            <div class="team-score-wrapper" style="display:flex; gap:15px; align-items:center;">
+                                <span class="team-poss-pct" style="font-size:0.75rem; color:#8b949e; min-width:35px; text-align:right;">${pB}</span>
+                                <span class="team-goals-num" style="font-weight:bold; font-size:1.1rem; color:#58a6ff; min-width:15px; text-align:right;">${aScoreText}</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="team-row-node" style="display:flex; justify-content:space-between; align-items:center;">
-                        <div class="team-identity-wrapper" style="display:flex; align-items:center; gap:10px;">
-                            <i class="fas fa-tshirt" style="color: ${jAway.color} !important; text-shadow: ${jAway.textShadow} !important; font-size:1.1rem;"></i>
-                            <span class="team-player-name" style="font-weight:600; color:${m.away === 'TBD' ? '#8b949e' : '#c9d1d9'}">${m.away}</span>
-                        </div>
-                        <div class="team-score-wrapper" style="display:flex; gap:15px; align-items:center;">
-                            <span class="team-poss-pct" style="font-size:0.75rem; color:#8b949e; min-width:35px; text-align:right;">${pB}</span>
-                            <span class="team-goals-num" style="font-weight:bold; font-size:1.1rem; color:#58a6ff; min-width:15px; text-align:right;">${aScoreText}</span>
-                        </div>
+                    <div class="match-status-action-box" style="display:flex; flex-direction:column; align-items:flex-end; gap:6px; margin-left:15px; border-left:1px solid #21262d; padding-left:15px; min-width:80px;">
+                        <span class="match-time-status" style="font-weight:bold; color: ${m.played ? '#ff7b72' : '#58a6ff'}; font-size:0.85rem;">${m.played ? 'FT' : m.timeSlot}</span>
+                        ${isAdminLoggedIn && m.home !== "TBD" && m.away !== "TBD" ? `<button class="update-score-btn" onclick="openWcScoreModal('${m.id}')" style="padding:4px 8px; background:#21262d; border:1px solid #30363d; color:#c9d1d9; border-radius:4px; cursor:pointer; font-size:0.75rem;"><i class="fas fa-edit"></i> Score</button>` : `<span class="match-status-label" style="font-size:0.75rem; color:#8b949e;">${m.played ? 'Finished' : 'Scheduled'}</span>`}
                     </div>
-                </div>
-                <div class="match-status-action-box" style="display:flex; flex-direction:column; align-items:flex-end; gap:6px; margin-left:15px; border-left:1px solid #21262d; padding-left:15px; min-width:80px;">
-                    <span class="match-time-status" style="font-weight:bold; color: ${m.played ? '#ff7b72' : '#58a6ff'}; font-size:0.85rem;">${m.played ? 'FT' : m.timeSlot}</span>
-                    ${isAdminLoggedIn && m.home !== "TBD" && m.away !== "TBD" ? `<button class="update-score-btn" onclick="openWcScoreModal('${m.id}')" style="padding:4px 8px; background:#21262d; border:1px solid #30363d; color:#c9d1d9; border-radius:4px; cursor:pointer; font-size:0.75rem;"><i class="fas fa-edit"></i> Score</button>` : `<span class="match-status-label" style="font-size:0.75rem; color:#8b949e;">${m.played ? 'Finished' : 'Scheduled'}</span>`}
-                </div>
-            `;
-            grid.appendChild(card);
-        });
+                `;
+                grid.appendChild(card);
+            });
+        }
     });
 }
 
@@ -543,7 +596,6 @@ function renderWcFixtures() {
 function checkAndPopulateSpecialKnockouts(wc) {
     if (!wc) return;
 
-    // ১. সব গ্রুপ ম্যাচ শেষ কি না তা যাচাই করা
     let allGroupMatchesPlayed = true;
     wc.fixtures.forEach(f => {
         if (f.stage === "Group Stage") {
@@ -557,7 +609,6 @@ function checkAndPopulateSpecialKnockouts(wc) {
     let thirdPlacedPlayers = []; 
     const letters = ['A','B','C','D','E','F','G','H','I','J','K','L'];
 
-    // ২. প্রতিটি গ্রুপের পারফরম্যান্স বিশ্লেষণ
     letters.forEach(gLetter => {
         let gPlayers = wc.groups[gLetter];
         if(!gPlayers) return;
@@ -568,19 +619,20 @@ function checkAndPopulateSpecialKnockouts(wc) {
             if (f.stage === "Group Stage") {
                 f.matches.forEach(m => {
                     if (m.group === gLetter && m.played) {
-                        stats[m.home].gf += m.homeScore; stats[m.home].ga += m.awayScore;
-                        stats[m.away].gf += m.awayScore; stats[m.away].ga += m.homeScore;
-                        
-                        // বল পজিশন ক্যালকুলেশন
-                        let hp = parseFloat(m.homePoss || 0); let ap = parseFloat(m.awayPoss || 0);
-                        if (hp > 0 || ap > 0) {
-                            stats[m.home].totalPoss += hp; stats[m.home].playedWithPoss++;
-                            stats[m.away].totalPoss += ap; stats[m.away].playedWithPoss++;
-                        }
+                        if(stats[m.home] && stats[m.away]) {
+                            stats[m.home].gf += m.homeScore; stats[m.home].ga += m.awayScore;
+                            stats[m.away].gf += m.awayScore; stats[m.away].ga += m.homeScore;
+                            
+                            let hp = parseFloat(m.homePoss || 0); let ap = parseFloat(m.awayPoss || 0);
+                            if (hp > 0 || ap > 0) {
+                                stats[m.home].totalPoss += hp; stats[m.home].playedWithPoss++;
+                                stats[m.away].totalPoss += ap; stats[m.away].playedWithPoss++;
+                            }
 
-                        if (m.homeScore > m.awayScore) stats[m.home].pts += 3;
-                        else if (m.homeScore < m.awayScore) stats[m.away].pts += 3;
-                        else { stats[m.home].pts += 1; stats[m.away].pts += 1; }
+                            if (m.homeScore > m.awayScore) stats[m.home].pts += 3;
+                            else if (m.homeScore < m.awayScore) stats[m.away].pts += 3;
+                            else { stats[m.home].pts += 1; stats[m.away].pts += 1; }
+                        }
                     }
                 });
             }
@@ -588,28 +640,24 @@ function checkAndPopulateSpecialKnockouts(wc) {
 
         Object.values(stats).forEach(p => { p.gd = p.gf - p.ga; });
 
-        // গ্রুপ টেবিল সর্টিং
         let sorted = Object.values(stats).sort((a,b) => {
             if(b.pts !== a.pts) return b.pts - a.pts;
             if(b.gd !== a.gd) return b.gd - a.gd;
             if(b.gf !== a.gf) return b.gf - a.gf;
-            return a.ga - b.ga; // GA কম হলে আগে
+            return a.ga - b.ga; 
         });
 
         groupWinners[gLetter] = [sorted[0].name, sorted[1].name]; 
         if(sorted[2]) thirdPlacedPlayers.push(sorted[2]); 
     });
 
-    // ৩. ১২টি গ্রুপের সেরা ৮টি ৩য় স্থান অর্জনকারী বাছাই
     thirdPlacedPlayers.sort((a, b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf || a.ga - b.ga);
     let best8Thirds = thirdPlacedPlayers.slice(0, 8).map(p => p.name);
 
-    // ৪. নকআউট কোয়ালিফায়ার তালিকা তৈরি (২৪ + ৮ = ৩২ জন)
     let qualified32 = [];
     letters.forEach(g => { if(groupWinners[g]) { qualified32.push(groupWinners[g][0]); qualified32.push(groupWinners[g][1]); }});
     best8Thirds.forEach(p => { qualified32.push(p); });
 
-    // ৫. রাউন্ড অফ ৩২ এর ব্র্যাকেট পপুলেশন
     wc.fixtures.forEach(f => {
         if (f.stage === "Round of 32") {
             f.matches.forEach((m, i) => {
@@ -621,17 +669,42 @@ function checkAndPopulateSpecialKnockouts(wc) {
         }
     });
 
-    // ৬. পরবর্তী রাউন্ডগুলোর (সেমি/ফাইনাল) জন্য প্রমোশন কল করা
     promoteKnockoutWinners(wc);
+    if (window.fbSet && window.fbRef && window.fbDatabase) {
+        window.fbSet(window.fbRef(window.fbDatabase, 'special_worldcup'), wcTournaments);
+    }
     localStorage.setItem("efootballSpecialWorldCups", JSON.stringify(wcTournaments));
-    updateKnockoutUI(wc);
+}
+
+function promoteKnockoutWinners(wc) {
+    let knockoutStages = wc.fixtures.filter(f => f.stage !== "Group Stage");
+    for (let i = 0; i < knockoutStages.length - 1; i++) {
+        let currentStage = knockoutStages[i];
+        let nextStage = knockoutStages[i + 1];
+
+        currentStage.matches.forEach((m, idx) => {
+            if (m.played) {
+                let winner = (m.homeScore > m.awayScore) ? m.home : m.away;
+                if (m.homeScore === m.awayScore) winner = (m.homePenalty > m.awayPenalty) ? m.home : m.away;
+
+                let targetMatchIdx = Math.floor(idx / 2);
+                let isAway = (idx % 2 === 1);
+
+                if (nextStage.matches[targetMatchIdx]) {
+                    if (!isAway) nextStage.matches[targetMatchIdx].home = winner;
+                    else nextStage.matches[targetMatchIdx].away = winner;
+                }
+            }
+        });
+    }
 }
 
 // ==========================================================================
-// ৭. অ্যাডমিন স্কোর মডাল কন্ট্রোল
+// ७. অ্যাডমিন স্কোর মডাল কন্ট্রোল
 // ==========================================================================
 function openWcScoreModal(matchId) {
     const wc = wcTournaments.find(w => w.id === currentWcId);
+    if (!wc) return;
     let match = null;
     wc.fixtures.forEach(f => {
         let m = f.matches.find(x => x.id === matchId);
@@ -682,6 +755,13 @@ function saveMatchResult() {
         currentEditingWcMatch.awayPenalty = parseInt(pB || 0);
     }
 
+    const wc = wcTournaments.find(w => w.id === currentWcId);
+    checkAndPopulateSpecialKnockouts(wc);
+
+    if (window.fbSet && window.fbRef && window.fbDatabase) {
+        window.fbSet(window.fbRef(window.fbDatabase, 'special_worldcup'), wcTournaments);
+    }
+
     localStorage.setItem("efootballSpecialWorldCups", JSON.stringify(wcTournaments));
     closeScoreModal();
     
@@ -691,73 +771,86 @@ function saveMatchResult() {
 }
 
 // ==========================================================================
-// ৬. অ্যাডমিন স্কোর মডাল পপ-আপ কন্ট্রোল (Special World Cup - ফায়ারবেস সহ আপডেটেড)
+// 🏆 ৮. লাইভ টুর্নামেন্ট রেজাল্ট এবং টপ স্কোরার ENGINE
 // ==========================================================================
-function openScoreModal(matchId) {
-    // এখানে আপনার স্পেশাল ওয়ার্ল্ড কাপের গ্লোবাল ভ্যারিয়েবলের নাম অনুযায়ী (ধরি specialWorldCups বা worldCups) চেঞ্জ হতে পারে। 
-    // যদি ভ্যারিয়েবলের নাম শুধু leagues-ই রেখে থাকেন, তবে যা আছে তাই থাকবে।
-    const league = leagues.find(l => l.id === currentLeagueId);
-    let foundMatch = null;
-    league.fixtures.forEach(f => {
-        let m = f.matches.find(match => match.id === matchId);
-        if (m) foundMatch = m;
+function calculateWcLiveResults() {
+    const wc = wcTournaments.find(w => w.id === currentWcId);
+    if (!wc) return;
+
+    document.getElementById("live-champ-prize").textContent = "Prize: ৳" + wc.prizes.first;
+    document.getElementById("live-runner-prize").textContent = "Prize: ৳" + wc.prizes.second;
+    document.getElementById("live-scorer-prize").textContent = "Prize: ৳" + wc.prizes.scorer;
+
+    const champBox = document.getElementById("live-champion-box");
+    const runnerBox = document.getElementById("live-runnerup-box");
+    const scorerBox = document.getElementById("live-topscorer-box");
+
+    let goalStats = {};
+    wc.players.forEach(p => goalStats[p] = { name: p, goals: 0 });
+
+    let playedCount = 0;
+    let finalMatch = null;
+
+    wc.fixtures.forEach(f => {
+        if (f.stage === "Final") finalMatch = f.matches[0];
+        f.matches.forEach(m => {
+            if (m.played) {
+                playedCount++;
+                if (goalStats[m.home]) goalStats[m.home].goals += parseInt(m.homeScore);
+                if (goalStats[m.away]) goalStats[m.away].goals += parseInt(m.awayScore);
+            }
+        });
     });
 
-    if (!foundMatch) return;
-    currentEditingMatch = foundMatch;
+    if (playedCount === 0) {
+        let empty = `<span class="no-data-text"><i class="fas fa-hourglass-start"></i> No matches played yet</span>`;
+        if(champBox) champBox.innerHTML = empty; 
+        if(runnerBox) runnerBox.innerHTML = empty; 
+        if(scorerBox) scorerBox.innerHTML = empty;
+        return;
+    }
 
-    document.getElementById("modal-teamA-name").textContent = foundMatch.home;
-    document.getElementById("modal-teamB-name").textContent = foundMatch.away;
-    document.getElementById("modal-teamA-score").value = foundMatch.homeScore !== null ? foundMatch.homeScore : "";
-    document.getElementById("modal-teamB-score").value = foundMatch.awayScore !== null ? foundMatch.awayScore : "";
-    document.getElementById("modal-teamA-poss").value = foundMatch.homePoss !== null ? foundMatch.homePoss : "";
-    document.getElementById("modal-teamB-poss").value = foundMatch.awayPoss !== null ? foundMatch.awayPoss : "";
+    if (finalMatch && finalMatch.played) {
+        let winner = finalMatch.homeScore > finalMatch.awayScore ? finalMatch.home : finalMatch.away;
+        let runner = finalMatch.homeScore > finalMatch.awayScore ? finalMatch.away : finalMatch.home;
+        if (finalMatch.homeScore === finalMatch.awayScore) {
+            winner = finalMatch.homePenalty > finalMatch.awayPenalty ? finalMatch.home : finalMatch.away;
+            runner = finalMatch.homePenalty > finalMatch.awayPenalty ? finalMatch.away : finalMatch.home;
+        }
 
-    document.getElementById("score-modal").style.display = "flex";
-}
+        if(champBox) champBox.innerHTML = `<span class="winner-name" style="color:#ffd700; font-weight:bold;"><i class="fas fa-trophy"></i> ${winner}</span>`;
+        if(runnerBox) runnerBox.innerHTML = `<span class="winner-name" style="color:#c0c0c0; font-weight:bold;"><i class="fas fa-medal"></i> ${runner}</span>`;
+    } else {
+        if(champBox) champBox.innerHTML = `<span class="winner-name" style="font-size:11rem; color:#ffd700;"><i class="fas fa-spinner fa-spin"></i> Tournament Live...</span>`;
+        if(runnerBox) runnerBox.innerHTML = `<span class="winner-name" style="font-size:11rem; color:#c0c0c0;"><i class="fas fa-spinner fa-spin"></i> Tournament Live...</span>`;
+    }
 
-function closeScoreModal() {
-    document.getElementById("score-modal").style.display = "none";
-    currentEditingMatch = null;
-}
+    if(scorerBox) {
+        let sortedScorers = Object.values(goalStats).sort((a,b) => b.goals - a.goals);
+        let topScorer = sortedScorers[0];
 
-function saveMatchResult() {
-    if (!currentEditingMatch) return;
-
-    const hs = document.getElementById("modal-teamA-score").value;
-    const as = document.getElementById("modal-teamB-score").value;
-    const hp = document.getElementById("modal-teamA-poss").value;
-    const ap = document.getElementById("modal-teamB-poss").value;
-
-    if (hs === "" || as === "") { alert("দয়া করে দুই দলেরই গোল সংখ্যা ইনপুট দিন!"); return; }
-    if (hp !== "" || ap !== "") {
-        if (parseInt(hp) + parseInt(ap) !== 100) {
-            alert("ভুল ইনপুট! দুই দলের বল পজিশন যোগ করলে অবশ্যই ১০০% হতে হবে।");
-            return;
+        if (topScorer && topScorer.goals > 0) {
+            let nation = wc.playerNations[topScorer.name] || "TBD";
+            let jStyle = NAT_JERSEY_STYLES[nation] || { color: "#fff" };
+            scorerBox.innerHTML = `
+                <div class="result-identity-row" style="display:flex; align-items:center; gap:8px; justify-content:center;">
+                    <i class="fas fa-tshirt" style="color: ${jStyle.color}; font-size: 1.2rem;"></i>
+                    <span class="winner-name" style="font-weight:bold;">${topScorer.name}</span>
+                </div>
+                <div class="winner-meta-sub" style="color:#ff7b72; font-weight:bold; margin-top:5px;"><i class="fas fa-futbol"></i> Total Goals: ${topScorer.goals}</div>
+            `;
+        } else {
+            scorerBox.innerHTML = `<span class="no-data-text">No goals scored yet</span>`;
         }
     }
-
-    currentEditingMatch.homeScore = parseInt(hs);
-    currentEditingMatch.awayScore = parseInt(as);
-    currentEditingMatch.homePoss = hp !== "" ? parseInt(hp) : 0;
-    currentEditingMatch.awayPoss = ap !== "" ? parseInt(ap) : 0;
-    currentEditingMatch.played = true;
-
-    // ১. লোকাল স্টোরেজে স্পেশাল ওয়ার্ল্ড কাপের আলাদা কি (Key) তে সেভ রাখা হলো
-    localStorage.setItem("efootballSpecialWorldCup", JSON.stringify(leagues));
-
-    // ২. ফায়ারবেস রিয়েল-টাইম ডাটাবেজে ক্লাউড আপডেট পুশ (পাথ পরিবর্তন করা হয়েছে)
-    if (window.fbSet && window.fbRef && window.fbDatabase) {
-        // 'leagues' এর পরিবর্তে এখানে 'special_worldcup' পাথে ডেটা সেভ হবে যেন লীগের ডেটা ডিলিট না হয়
-        window.fbSet(window.fbRef(window.fbDatabase, 'special_worldcup'), leagues)
-        .then(() => {
-            console.log("স্পেশাল ওয়ার্ল্ড কাপের স্কোর ফায়ারবেসে সফলভাবে সিঙ্ক হয়েছে!");
-        })
-        .catch((err) => {
-            console.error("ফায়ারবেস আপডেট এরর:", err);
-        });
-    }
-
-    closeScoreModal();
-    renderFixtures();
 }
+
+// এইচটিএমএল মডিউল আর্কিটেকচারের গ্লোবাল স্কোপ ম্যাপিং
+window.toggleCreateForm = toggleCreateForm;
+window.generateSpecialWorldCup = generateSpecialWorldCup;
+window.openWc = openWc;
+window.backToLeagueList = backToLeagueList;
+window.switchWcTab = switchWcTab;
+window.openWcScoreModal = openWcScoreModal;
+window.closeScoreModal = closeScoreModal;
+window.saveMatchResult = saveMatchResult;

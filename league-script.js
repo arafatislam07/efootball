@@ -23,7 +23,44 @@ const WEEK_DAYS_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday",
 window.onload = function() {
     renderLeagueList(); 
     updateAdminUI();    
+    // ফায়ারবেস থেকে রিয়েল-টাইম লিগ ডেটা লিসেন করার ফাংশন
+    listenToFirebaseLeagues();
 };
+
+// ==========================================================================
+// ১.৫ ফায়ারবেস লাইভ ডেটা লিসেনার ইঞ্জিন (নতুন প্রজেক্টের জন্য যুক্ত করা হয়েছে)
+// ==========================================================================
+function listenToFirebaseLeagues() {
+    if (!window.fbDatabase || !window.fbOnValue || !window.fbRef) {
+        console.error("Firebase কনফিগারেশন এখনো লোড হয়নি।");
+        return;
+    }
+
+    const leaguesRef = window.fbRef(window.fbDatabase, 'leagues');
+    window.fbOnValue(leaguesRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            // যদি ডাটাবেজে ডেটা থাকে, তবে অ্যারে ফরম্যাটে সেট হবে
+            leagues = Array.isArray(data) ? data : Object.values(data);
+        } else {
+            leagues = [];
+        }
+        // লোকাল ব্যাকআপ আপডেট ও স্ক্রিন রেন্ডার
+        localStorage.setItem("efootballLeagues", JSON.stringify(leagues));
+        
+        if (currentLeagueId) {
+            // যদি কোনো নির্দিষ্ট লিগ ওপেন থাকে তবে তার ভেতরের ভিউ রিফ্রেশ হবে
+            const currentTab = document.querySelector(".tab-btn.active");
+            if (currentTab) {
+                if (currentTab.id === "tab-table-btn") calculateStandings();
+                else if (currentTab.id === "tab-matches-btn") renderFixtures();
+                else if (currentTab.id === "tab-result-btn") calculateLiveResults();
+            }
+        } else {
+            renderLeagueList();
+        }
+    });
+}
 
 function updateAdminUI() {
     const indicator = document.getElementById("admin-indicator");
@@ -165,6 +202,11 @@ function generateNewLeague() {
     };
 
     leagues.push(newLeague);
+    
+    // ফায়ারবেস ক্লাউড ডাটাবেজে নতুন লিগ পুশ করা
+    if (window.fbSet && window.fbRef && window.fbDatabase) {
+        window.fbSet(window.fbRef(window.fbDatabase, 'leagues'), leagues);
+    }
     localStorage.setItem("efootballLeagues", JSON.stringify(leagues));
     
     document.getElementById("league-name-input").value = "";
@@ -243,6 +285,9 @@ function renderLeagueList() {
 function deleteLeague(id) {
     if (confirm("আপনি কি নিশ্চিতভাবে এই পুরো টুর্নামেন্টটি ফিক্সচারসহ ডিলিট করতে চান?")) {
         leagues = leagues.filter(l => l.id !== id);
+        if (window.fbSet && window.fbRef && window.fbDatabase) {
+            window.fbSet(window.fbRef(window.fbDatabase, 'leagues'), leagues);
+        }
         localStorage.setItem("efootballLeagues", JSON.stringify(leagues));
         renderLeagueList();
         backToLeagueList();
@@ -280,7 +325,6 @@ function backToLeagueList() {
     currentLeagueId = null;
 }
 
-// ৩টি ট্যাব সুইচিং কন্ট্রোল
 function switchTab(tab) {
     const tableBtn = document.getElementById("tab-table-btn");
     const matchesBtn = document.getElementById("tab-matches-btn");
@@ -290,31 +334,31 @@ function switchTab(tab) {
     const matchesContent = document.getElementById("tab-matches-content");
     const resultContent = document.getElementById("tab-result-content");
 
-    tableBtn.classList.remove("active");
-    matchesBtn.classList.remove("active");
-    resultBtn.classList.remove("active");
+    if(tableBtn) tableBtn.classList.remove("active");
+    if(matchesBtn) matchesBtn.classList.remove("active");
+    if(resultBtn) resultBtn.classList.remove("active");
     
-    tableContent.style.display = "none";
-    matchesContent.style.display = "none";
-    resultContent.style.display = "none";
+    if(tableContent) tableContent.style.display = "none";
+    if(matchesContent) matchesContent.style.display = "none";
+    if(resultContent) resultContent.style.display = "none";
 
     if (tab === 'table') {
-        tableBtn.classList.add("active");
-        tableContent.style.display = "block";
+        if(tableBtn) tableBtn.classList.add("active");
+        if(tableContent) tableContent.style.display = "block";
         calculateStandings(); 
     } else if (tab === 'matches') {
-        matchesBtn.classList.add("active");
-        matchesContent.style.display = "block";
+        if(matchesBtn) matchesBtn.classList.add("active");
+        if(matchesContent) matchesContent.style.display = "block";
         renderFixtures();    
     } else if (tab === 'result') {
-        resultBtn.classList.add("active");
-        resultContent.style.display = "block";
+        if(resultBtn) resultBtn.classList.add("active");
+        if(resultContent) resultContent.style.display = "block";
         calculateLiveResults(); 
     }
 }
 
 // ==========================================================================
-// ৪. পয়েন্ট টেবিল ইঞ্জিন এবং গ্লোবাল স্ট্যান্ডিংস ডেটা রিটার্নার
+// ৪. পয়েন্ট টেবিল ইঞ্জিন এবং গ্লোবাল স্ট্যান্ডিংস ডেটা রিটার্নার
 // ==========================================================================
 function getCalculatedStandings() {
     const league = leagues.find(l => l.id === currentLeagueId);
@@ -335,21 +379,23 @@ function getCalculatedStandings() {
                 let hs = parseInt(m.homeScore); let as = parseInt(m.awayScore);
                 let hp = parseFloat(m.homePoss || 0); let ap = parseFloat(m.awayPoss || 0);
 
-                stats[h].p++; stats[a].p++;
-                stats[h].gf += hs; stats[h].ga += as;
-                stats[a].gf += as; stats[a].ga += hs;
+                if(stats[h] && stats[a]) {
+                    stats[h].p++; stats[a].p++;
+                    stats[h].gf += hs; stats[h].ga += as;
+                    stats[a].gf += as; stats[a].ga += hs;
 
-                if (hp > 0 || ap > 0) {
-                    stats[h].totalPoss += hp; stats[h].matchesWithPoss++;
-                    stats[a].totalPoss += ap; stats[a].matchesWithPoss++;
-                }
+                    if (hp > 0 || ap > 0) {
+                        stats[h].totalPoss += hp; stats[h].matchesWithPoss++;
+                        stats[a].totalPoss += ap; stats[a].matchesWithPoss++;
+                    }
 
-                if (hs > as) {
-                    stats[h].w++; stats[h].pts += 3; stats[a].l++;
-                } else if (hs < as) {
-                    stats[a].w++; stats[a].pts += 3; stats[h].l++;
-                } else {
-                    stats[h].d++; stats[h].pts += 1; stats[a].d++; stats[a].pts += 1;
+                    if (hs > as) {
+                        stats[h].w++; stats[h].pts += 3; stats[a].l++;
+                    } else if (hs < as) {
+                        stats[a].w++; stats[a].pts += 3; stats[h].l++;
+                    } else {
+                        stats[h].d++; stats[h].pts += 1; stats[a].d++; stats[a].pts += 1;
+                    }
                 }
             }
         });
@@ -377,6 +423,7 @@ function calculateStandings() {
 
     const { standings } = getCalculatedStandings();
     const tbody = document.getElementById("standings-tbody");
+    if(!tbody) return;
     tbody.innerHTML = "";
 
     standings.forEach((p, idx) => {
@@ -418,64 +465,68 @@ function calculateLiveResults() {
 
     if (totalPlayedMatches === 0) {
         let emptyState = `<span class="no-data-text"><i class="fas fa-hourglass-start"></i> No matches played yet</span>`;
-        champBox.innerHTML = emptyState;
-        runnerBox.innerHTML = emptyState;
-        scorerBox.innerHTML = emptyState;
+        if(champBox) champBox.innerHTML = emptyState;
+        if(runnerBox) runnerBox.innerHTML = emptyState;
+        if(scorerBox) scorerBox.innerHTML = emptyState;
         return;
     }
 
-    // ১. চ্যাম্পিয়ন এবং রানার্স আপ ডিক্লেয়ারেশন (স্ট্যান্ডিংস অনুযায়ী অটো)
     let champ = standings[0];
     let runner = standings[1] || champ; 
 
-    let champJersey = league.playerJerseys[champ.name] || JERSEY_STYLES[0];
-    champBox.innerHTML = `
-        <div class="result-identity-row">
-            <i class="fas fa-tshirt" style="color: ${champJersey.color}; font-size: 1.5rem;"></i>
-            <span class="winner-name">${champ.name}</span>
-        </div>
-        <div class="winner-meta-sub">${champ.pts} Pts | ${champ.gf} Goals</div>
-    `;
+    if(champBox) {
+        let champJersey = league.playerJerseys[champ.name] || JERSEY_STYLES[0];
+        champBox.innerHTML = `
+            <div class="result-identity-row">
+                <i class="fas fa-tshirt" style="color: ${champJersey.color}; font-size: 1.5rem;"></i>
+                <span class="winner-name">${champ.name}</span>
+            </div>
+            <div class="winner-meta-sub">${champ.pts} Pts | ${champ.gf} Goals</div>
+        `;
+    }
 
-    let runnerJersey = league.playerJerseys[runner.name] || JERSEY_STYLES[1];
-    runnerBox.innerHTML = `
-        <div class="result-identity-row">
-            <i class="fas fa-tshirt" style="color: ${runnerJersey.color}; font-size: 1.5rem;"></i>
-            <span class="winner-name">${runner.name}</span>
-        </div>
-        <div class="winner-meta-sub">${runner.pts} Pts | ${runner.gf} Goals</div>
-    `;
+    if(runnerBox) {
+        let runnerJersey = league.playerJerseys[runner.name] || JERSEY_STYLES[1];
+        runnerBox.innerHTML = `
+            <div class="result-identity-row">
+                <i class="fas fa-tshirt" style="color: ${runnerJersey.color}; font-size: 1.5rem;"></i>
+                <span class="winner-name">${runner.name}</span>
+            </div>
+            <div class="winner-meta-sub">${runner.pts} Pts | ${runner.gf} Goals</div>
+        `;
+    }
 
-    // ২. টপ স্কোরার লজিক (যে সবচেয়ে বেশি গোল (GF) দিয়েছে)
-    let highestGoals = -1;
-    let topScorersList = [];
+    if(scorerBox) {
+        let highestGoals = -1;
+        let topScorersList = [];
 
-    standings.forEach(p => {
-        if (p.gf > highestGoals) {
-            highestGoals = p.gf;
-            topScorersList = [p];
-        } else if (p.gf === highestGoals && highestGoals > 0) {
-            topScorersList.push(p); 
-        }
-    });
-
-    if (highestGoals <= 0) {
-        scorerBox.innerHTML = `<span class="no-data-text"><i class="fas fa-exclamation-circle"></i> No goals scored yet</span>`;
-    } else {
-        scorerBox.innerHTML = "";
-        topScorersList.forEach(scorer => {
-            let scorerJersey = league.playerJerseys[scorer.name] || JERSEY_STYLES[0];
-            let item = document.createElement("div");
-            item.style.marginBottom = "8px";
-            item.innerHTML = `
-                <div class="result-identity-row">
-                    <i class="fas fa-tshirt" style="color: ${scorerJersey.color}; font-size: 1.2rem;"></i>
-                    <span class="winner-name" style="font-size: 1.1rem;">${scorer.name}</span>
-                </div>
-                <div class="winner-meta-sub" style="color: #ff7b72; font-weight: bold;"><i class="fas fa-futbol"></i> Total Goals: ${scorer.gf}</div>
-            `;
-            scorerBox.appendChild(item);
+        standings.forEach(p => {
+            if (p.gf > highestGoals) {
+                highestGoals = p.gf;
+                topScorersList = [p];
+            } else if (p.gf === highestGoals && highestGoals > 0) {
+                topScorersList.push(p); 
+            }
         });
+
+        if (highestGoals <= 0) {
+            scorerBox.innerHTML = `<span class="no-data-text"><i class="fas fa-exclamation-circle"></i> No goals scored yet</span>`;
+        } else {
+            scorerBox.innerHTML = "";
+            topScorersList.forEach(scorer => {
+                let scorerJersey = league.playerJerseys[scorer.name] || JERSEY_STYLES[0];
+                let item = document.createElement("div");
+                item.style.marginBottom = "8px";
+                item.innerHTML = `
+                    <div class="result-identity-row">
+                        <i class="fas fa-tshirt" style="color: ${scorerJersey.color}; font-size: 1.2rem;"></i>
+                        <span class="winner-name" style="font-size: 1.1rem;">${scorer.name}</span>
+                    </div>
+                    <div class="winner-meta-sub" style="color: #ff7b72; font-weight: bold;"><i class="fas fa-futbol"></i> Total Goals: ${scorer.gf}</div>
+                `;
+                scorerBox.appendChild(item);
+            });
+        }
     }
 }
 
@@ -511,58 +562,61 @@ function renderFixtures() {
         container.appendChild(block);
 
         const grid = document.getElementById(`round-grid-${f.matchday}`);
-        f.matches.forEach(m => {
-            const row = document.createElement("div");
-            row.className = "google-match-row"; 
-            
-            let homeJersey = (league.playerJerseys && league.playerJerseys[m.home]) ? league.playerJerseys[m.home] : JERSEY_STYLES[0];
-            let awayJersey = (league.playerJerseys && league.playerJerseys[m.away]) ? league.playerJerseys[m.away] : JERSEY_STYLES[1];
-
-            let sA = m.played ? m.homeScore : "-";
-            let sB = m.played ? m.awayScore : "-";
-            let pA = m.played ? m.homePoss + "% Poss" : "";
-            let pB = m.played ? m.awayPoss + "% Poss" : "";
-
-            row.innerHTML = `
-                <div class="teams-vertical-stack">
-                    <div class="player-line-node">
-                        <div class="player-identity">
-                            <i class="fas fa-tshirt dynamic-jersey-icon" style="color: ${homeJersey.color} !important; text-shadow: ${homeJersey.textShadow} !important;"></i>
-                            <span class="player-display-name">${m.home}</span>
-                        </div>
-                        <div class="score-poss-block">
-                            <span class="node-score">${sA}</span>
-                            <span class="node-poss">${pA}</span>
-                        </div>
-                    </div>
-                    <div class="player-line-node">
-                        <div class="player-identity">
-                            <i class="fas fa-tshirt dynamic-jersey-icon" style="color: ${awayJersey.color} !important; text-shadow: ${awayJersey.textShadow} !important;"></i>
-                            <span class="player-display-name">${m.away}</span>
-                        </div>
-                        <div class="score-poss-block">
-                            <span class="node-score">${sB}</span>
-                            <span class="node-poss">${pB}</span>
-                        </div>
-                    </div>
-                </div>
+        if(grid) {
+            f.matches.forEach(m => {
+                const row = document.createElement("div");
+                row.className = "google-match-row"; 
                 
-                <div class="match-meta-status">
-                    <span class="slot-time">${m.played ? 'FT' : m.timeSlot}</span>
-                    <span class="slot-date"><i class="far fa-calendar-alt"></i> ${f.date}</span>
-                    ${isAdminLoggedIn ? `<button class="update-score-btn" onclick="openScoreModal('${m.id}')"><i class="fas fa-edit"></i> Score</button>` : `<span class="viewer-status-text">${m.played ? 'Finished' : 'Scheduled'}</span>`}
-                </div>
-            `;
-            grid.appendChild(row);
-        });
+                let homeJersey = (league.playerJerseys && league.playerJerseys[m.home]) ? league.playerJerseys[m.home] : JERSEY_STYLES[0];
+                let awayJersey = (league.playerJerseys && league.playerJerseys[m.away]) ? league.playerJerseys[m.away] : JERSEY_STYLES[1];
+
+                let sA = m.played ? m.homeScore : "-";
+                let sB = m.played ? m.awayScore : "-";
+                let pA = m.played ? m.homePoss + "% Poss" : "";
+                let pB = m.played ? m.awayPoss + "% Poss" : "";
+
+                row.innerHTML = `
+                    <div class="teams-vertical-stack">
+                        <div class="player-line-node">
+                            <div class="player-identity">
+                                <i class="fas fa-tshirt dynamic-jersey-icon" style="color: ${homeJersey.color} !important; text-shadow: ${homeJersey.textShadow} !important;"></i>
+                                <span class="player-display-name">${m.home}</span>
+                            </div>
+                            <div class="score-poss-block">
+                                <span class="node-score">${sA}</span>
+                                <span class="node-poss">${pA}</span>
+                            </div>
+                        </div>
+                        <div class="player-line-node">
+                            <div class="player-identity">
+                                <i class="fas fa-tshirt dynamic-jersey-icon" style="color: ${awayJersey.color} !important; text-shadow: ${awayJersey.textShadow} !important;"></i>
+                                <span class="player-display-name">${m.away}</span>
+                            </div>
+                            <div class="score-poss-block">
+                                <span class="node-score">${sB}</span>
+                                <span class="node-poss">${pB}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="match-meta-status">
+                        <span class="slot-time">${m.played ? 'FT' : m.timeSlot}</span>
+                        <span class="slot-date"><i class="far fa-calendar-alt"></i> ${f.date}</span>
+                        ${isAdminLoggedIn ? `<button class="update-score-btn" onclick="openScoreModal('${m.id}')"><i class="fas fa-edit"></i> Score</button>` : `<span class="viewer-status-text">${m.played ? 'Finished' : 'Scheduled'}</span>`}
+                    </div>
+                `;
+                grid.appendChild(row);
+            });
+        }
     });
 }
 
 // ==========================================================================
-// ৬. অ্যাডমিন স্কোর মডাল পপ-আপ কন্ট্রোল (ফায়ারবেস সহ আপডেটেড)
+// ৬. অ্যাডমিন স্কোর মডাল পপ-আপ কন্ট্রোল (ফায়ারবেস সহ আপডেটেড)
 // ==========================================================================
 function openScoreModal(matchId) {
     const league = leagues.find(l => l.id === currentLeagueId);
+    if (!league) return;
     let foundMatch = null;
     league.fixtures.forEach(f => {
         let m = f.matches.find(match => match.id === matchId);
@@ -609,20 +663,29 @@ function saveMatchResult() {
     currentEditingMatch.awayPoss = ap !== "" ? parseInt(ap) : 0;
     currentEditingMatch.played = true;
 
-    // ১. লোকাল স্টোরেজে ব্যাকআপ হিসেবে সেভ রাখা হলো
     localStorage.setItem("efootballLeagues", JSON.stringify(leagues));
 
-    // ২. ফায়ারবেস রিয়েল-টাইম ডাটাবেজে ক্লাউড আপডেট পুশ (নতুন যোগ করা হয়েছে)
+    // ফায়ারবেস রিয়েল-টাইম ডাটাবেজে ক্লাউড আপডেট পুশ করা
     if (window.fbSet && window.fbRef && window.fbDatabase) {
         window.fbSet(window.fbRef(window.fbDatabase, 'leagues'), leagues)
         .then(() => {
-            console.log("ম্যাচের স্কোর ফায়ারবেসে সফলভাবে সিঙ্ক হয়েছে!");
+            console.log("ম্যাচের স্কোর ফায়ারবেসে সফলভাবে সিঙ্ক হয়েছে!");
         })
         .catch((err) => {
-            console.error("ফায়ারবেস আপডেট এরর:", err);
+            console.error("ফায়ারবেস আপডেট এরর:", err);
         });
     }
 
     closeScoreModal();
     renderFixtures();
 }
+
+// এইচটিএমএল-এর মডিউল স্কোপিং ফিক্স করার জন্য উইন্ডো অবজেক্টের ম্যাপিং গ্লোবালাইজেশন
+window.toggleCreateForm = toggleCreateForm;
+window.generateNewLeague = generateNewLeague;
+window.openLeague = openLeague;
+window.backToLeagueList = backToLeagueList;
+window.switchTab = switchTab;
+window.openScoreModal = openScoreModal;
+window.closeScoreModal = closeScoreModal;
+window.saveMatchResult = saveMatchResult;

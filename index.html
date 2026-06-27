@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
     
-    <!-- লোগোর সাইজ বাড়িয়ে পজিশন আপডেট করা হয়েছে -->
     <style>
         .main-header {
             position: relative; /* লোগোকে এটার সাপেক্ষে বামে বসানোর জন্য */
@@ -63,7 +62,6 @@
 <body>
 
     <header class="main-header">
-        <!-- টপ হেডার লোগো -->
         <div class="top-header-logo-container">
             <img src="logo.png" alt="Tournament Logo" class="top-header-logo">
         </div>
@@ -125,34 +123,56 @@
         </div>
     </main>
 
+    <div id="score-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeScoreModal()">&times;</span>
+            <h3><i class="fas fa-edit"></i> Update Match Score</h3>
+            <div class="modal-form">
+                <div class="modal-teams-row">
+                    <div class="modal-team-box">
+                        <span id="modal-teamA-name">Team A</span>
+                        <input type="number" id="modal-teamA-score" placeholder="Goals" min="0">
+                        <input type="number" id="modal-teamA-poss" placeholder="Possession %" min="0" max="100">
+                    </div>
+                    <div class="modal-vs">VS</div>
+                    <div class="modal-team-box">
+                        <span id="modal-teamB-name">Team B</span>
+                        <input type="number" id="modal-teamB-score" placeholder="Goals" min="0">
+                        <input type="number" id="modal-teamB-poss" placeholder="Possession %" min="0" max="100">
+                    </div>
+                </div>
+                <button onclick="saveMatchResult()" class="save-btn"><i class="fas fa-save"></i> Save Updates</button>
+            </div>
+        </div>
+    </div>
+
     <footer class="main-footer">
         <div id="admin-status">
             <button id="admin-login-btn" onclick="handleAdminAuth()"><i class="fas fa-lock"></i> Admin Login</button>
         </div>
     </footer>
 
-    <!-- ফায়ারবেস স্ক্রিপ্ট কানেকশন (নতুন যোগ করা হয়েছে) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getDatabase, ref, set, onValue, remove, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-        // আপনার প্রজেক্টের রিয়েল ফায়ারবেস কনফিগারেশন
+        // ফায়ারবেস কনফিগারেশন (আপনার একদম নতুন জিমেইল প্রজেক্টের কনফিগ)
         const firebaseConfig = {
-            apiKey: "AIzaSyBa871lgRrjzlam5NYmFds4HiJenveeH58",
-            authDomain: "efootball-hub-db8a1.firebaseapp.com",
-            databaseURL: "https://efootball-hub-db8a1-default-rtdb.firebaseio.com",
-            projectId: "efootball-hub-db8a1",
-            storageBucket: "efootball-hub-db8a1.firebasestorage.app",
-            messagingSenderId: "921691338387",
-            appId: "1:921691338387:web:a0c9178a21bea652db7f66",
-            measurementId: "G-D45QZLRRPL"
+            apiKey: "AIzaSyAyALeCHqPLxgHYNgHtdPpCfIE_MX6em_c",
+            authDomain: "efootball-tournament-hub.firebaseapp.com",
+            databaseURL: "https://efootball-tournament-hub-default-rtdb.firebaseio.com",
+            projectId: "efootball-tournament-hub",
+            storageBucket: "efootball-tournament-hub.firebasestorage.app",
+            messagingSenderId: "552060471013",
+            appId: "1:552060471013:web:18293ad6c1389a8320360c",
+            measurementId: "G-HHYQH81CZB"
         };
 
-        // ইনিশিয়ালাইজেশন
+        // ইনিশিয়ালাইজেশন
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
-        // ফাংশনগুলোকে গ্লোবাল উইন্ডো অবজেক্টে সেট করা হলো যেন script.js সহজে পায়
+        // Fungsi-fungsi dimasukkan ke global window object agar script.js mudah mengaksesnya
         window.fbDatabase = database;
         window.fbRef = ref;
         window.fbSet = set;
@@ -161,7 +181,6 @@
         window.fbPush = push;
     </script>
 
-    <!-- আপনার মূল স্ক্রিপ্ট ফাইলটি মডিউল হিসেবে কল করা হলো -->
     <script type="module" src="script.js"></script>
 </body>
 </html>

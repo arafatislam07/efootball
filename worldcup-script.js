@@ -30,7 +30,41 @@ const WEEK_DAYS_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 window.onload = function() {
     renderWcList();
     updateWcAdminUI();
+    // ফায়ারবেস থেকে লাইভ ডাটা লিসেন করার মূল ফাংশন
+    listenToFirebaseWorldCup();
 };
+
+// ==========================================================================
+// ১.৫ ফায়ারবেস লাইভ ডেটা লিসেনার ইঞ্জিন (নতুন প্রজেক্টের জন্য যুক্ত করা হয়েছে)
+// ==========================================================================
+function listenToFirebaseWorldCup() {
+    if (!window.fbDatabase || !window.fbOnValue || !window.fbRef) {
+        console.error("Firebase কনফিগারেশন এখনো লোড হয়নি।");
+        return;
+    }
+
+    const wcRef = window.fbRef(window.fbDatabase, 'standard_worldcup');
+    window.fbOnValue(wcRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            wcTournaments = Array.isArray(data) ? data : Object.values(data);
+        } else {
+            wcTournaments = [];
+        }
+        localStorage.setItem("efootballWorldCups", JSON.stringify(wcTournaments));
+        
+        if (currentWcId) {
+            const currentTab = document.querySelector(".tab-btn.active");
+            if (currentTab) {
+                if (currentTab.id === "tab-table-btn") calculateWcGroups();
+                else if (currentTab.id === "tab-matches-btn") renderWcFixtures();
+                else if (currentTab.id === "tab-result-btn") calculateWcLiveResults();
+            }
+        } else {
+            renderWcList();
+        }
+    });
+}
 
 function updateWcAdminUI() {
     const indicator = document.getElementById("admin-indicator");
@@ -252,6 +286,11 @@ function generateWorldCup() {
     };
 
     wcTournaments.push(newWc);
+    
+    // ফায়ারবেস ক্লাউড ডাটাবেজে নতুন বিশ্বকাপ পুশ করা
+    if (window.fbSet && window.fbRef && window.fbDatabase) {
+        window.fbSet(window.fbRef(window.fbDatabase, 'standard_worldcup'), wcTournaments);
+    }
     localStorage.setItem("efootballWorldCups", JSON.stringify(wcTournaments));
     toggleCreateForm();
     renderWcList();
@@ -303,6 +342,9 @@ function renderWcList() {
                 e.stopPropagation();
                 if(confirm("এই বিশ্বকাপটি ডিলিট করতে চান?")) {
                     wcTournaments = wcTournaments.filter(w => w.id !== wc.id);
+                    if (window.fbSet && window.fbRef && window.fbDatabase) {
+                        window.fbSet(window.fbRef(window.fbDatabase, 'standard_worldcup'), wcTournaments);
+                    }
                     localStorage.setItem("efootballWorldCups", JSON.stringify(wcTournaments));
                     renderWcList();
                 }
@@ -348,17 +390,25 @@ function switchWcTab(tab) {
     const matchesContent = document.getElementById("tab-matches-content");
     const resultContent = document.getElementById("tab-result-content");
 
-    tableBtn.classList.remove("active"); matchesBtn.classList.remove("active"); resultBtn.classList.remove("active");
-    tableContent.style.display = "none"; matchesContent.style.display = "none"; resultContent.style.display = "none";
+    if(tableBtn) tableBtn.classList.remove("active"); 
+    if(matchesBtn) matchesBtn.classList.remove("active"); 
+    if(resultBtn) resultBtn.classList.remove("active");
+    
+    if(tableContent) tableContent.style.display = "none"; 
+    if(matchesContent) matchesContent.style.display = "none"; 
+    if(resultContent) resultContent.style.display = "none";
 
     if (tab === 'table') {
-        tableBtn.classList.add("active"); tableContent.style.display = "block";
+        if(tableBtn) tableBtn.classList.add("active"); 
+        if(tableContent) tableContent.style.display = "block";
         calculateWcGroups();
     } else if (tab === 'matches') {
-        matchesBtn.classList.add("active"); matchesContent.style.display = "block";
+        if(matchesBtn) matchesBtn.classList.add("active"); 
+        if(matchesContent) matchesContent.style.display = "block";
         renderWcFixtures();
     } else {
-        resultBtn.classList.add("active"); resultContent.style.display = "block";
+        if(resultBtn) resultBtn.classList.add("active"); 
+        if(resultContent) resultContent.style.display = "block";
         calculateWcLiveResults();
     }
 }
@@ -371,6 +421,7 @@ function calculateWcGroups() {
     if (!wc) return;
 
     const container = document.getElementById("tab-table-content");
+    if(!container) return;
     container.innerHTML = "";
 
     Object.keys(wc.groups).forEach(gLetter => {
@@ -386,18 +437,20 @@ function calculateWcGroups() {
                         let hs = parseInt(m.homeScore); let as = parseInt(m.awayScore);
                         let hp = parseFloat(m.homePoss || 0); let ap = parseFloat(m.awayPoss || 0);
 
-                        stats[h].p++; stats[a].p++;
-                        stats[h].gf += hs; stats[h].ga += as;
-                        stats[a].gf += as; stats[a].ga += hs;
+                        if(stats[h] && stats[a]) {
+                            stats[h].p++; stats[a].p++;
+                            stats[h].gf += hs; stats[h].ga += as;
+                            stats[a].gf += as; stats[a].ga += hs;
 
-                        if (hp > 0 || ap > 0) {
-                            stats[h].totalPoss += hp; stats[h].playedWithPoss++;
-                            stats[a].totalPoss += ap; stats[a].playedWithPoss++;
+                            if (hp > 0 || ap > 0) {
+                                stats[h].totalPoss += hp; stats[h].playedWithPoss++;
+                                stats[a].totalPoss += ap; stats[a].playedWithPoss++;
+                            }
+
+                            if (hs > as) { stats[h].w++; stats[h].pts += 3; stats[a].l++; }
+                            else if (hs < as) { stats[a].w++; stats[a].pts += 3; stats[h].l++; }
+                            else { stats[h].d++; stats[h].pts += 1; stats[a].d++; stats[a].pts += 1; }
                         }
-
-                        if (hs > as) { stats[h].w++; stats[h].pts += 3; stats[a].l++; }
-                        else if (hs < as) { stats[a].w++; stats[a].pts += 3; stats[h].l++; }
-                        else { stats[h].d++; stats[h].pts += 1; stats[a].d++; stats[a].pts += 1; }
                     }
                 });
             }
@@ -456,7 +509,7 @@ function calculateWcGroups() {
 }
 
 // ==========================================================================
-// ৫. ফিক্সচার লেআউট রেন্ডারিং (গোল্ডেন ডেট বক্স ও নো দেশের নাম রুল সিঙ্ক)
+// ৫. ফিক্সচার লেআউট রেন্ডারিং (গোল্ডেন ডেটボックス ও নো দেশের নাম রুল সিঙ্ক)
 // ==========================================================================
 function renderWcFixtures() {
     const container = document.getElementById("matchdays-container");
@@ -481,73 +534,74 @@ function renderWcFixtures() {
         container.appendChild(block);
 
         const grid = document.getElementById(`round-grid-${f.matchday}`);
-        f.matches.forEach((m, idx) => {
-            const card = document.createElement("div");
-            card.className = "match-card"; 
-            card.style.background = "#161b22";
-            card.style.padding = "15px";
-            card.style.borderRadius = "8px";
-            card.style.border = m.played ? "1px solid #238636" : "1px solid #21262d";
-            card.style.display = "flex";
-            card.style.justifyContent = "space-between";
-            card.style.alignItems = "center";
+        if(grid) {
+            f.matches.forEach((m, idx) => {
+                const card = document.createElement("div");
+                card.className = "match-card"; 
+                card.style.background = "#161b22";
+                card.style.padding = "15px";
+                card.style.borderRadius = "8px";
+                card.style.border = m.played ? "1px solid #238636" : "1px solid #21262d";
+                card.style.display = "flex";
+                card.style.justifyContent = "space-between";
+                card.style.alignItems = "center";
 
-            let homeNat = wc.playerNations[m.home] || "TBD";
-            let awayNat = wc.playerNations[m.away] || "TBD";
-            let jHome = NAT_JERSEY_STYLES[homeNat] || { color: "#fff" };
-            let jAway = NAT_JERSEY_STYLES[awayNat] || { color: "#fff" };
+                let homeNat = wc.playerNations[m.home] || "TBD";
+                let awayNat = wc.playerNations[m.away] || "TBD";
+                let jHome = NAT_JERSEY_STYLES[homeNat] || { color: "#fff" };
+                let jAway = NAT_JERSEY_STYLES[awayNat] || { color: "#fff" };
 
-            let hScoreText = m.played ? m.homeScore : "-";
-            let aScoreText = m.played ? m.awayScore : "-";
-            
-            if (m.played && m.homePenalty !== null && m.awayPenalty !== null) {
-                hScoreText += ` (${m.homePenalty})`;
-                aScoreText += ` (${m.awayPenalty})`;
-            }
+                let hScoreText = m.played ? m.homeScore : "-";
+                let aScoreText = m.played ? m.awayScore : "-";
+                
+                if (m.played && m.homePenalty !== null && m.awayPenalty !== null) {
+                    hScoreText += ` (${m.homePenalty})`;
+                    aScoreText += ` (${m.awayPenalty})`;
+                }
 
-            let pA = m.played ? `${m.homePoss}%` : "";
-            let pB = m.played ? `${m.awayPoss}%` : "";
+                let pA = m.played ? `${m.homePoss}%` : "";
+                let pB = m.played ? `${m.awayPoss}%` : "";
 
-            let stageId = f.stage.replace(/\s+/g, '-');
+                let stageId = f.stage.replace(/\s+/g, '-');
 
-            card.innerHTML = `
-                <div class="match-teams-block" style="display:flex; flex-direction:column; gap:12px; flex-grow:1;">
-                    <div class="team-row-node" style="display:flex; justify-content:space-between; align-items:center;">
-                        <div class="team-identity-wrapper" style="display:flex; align-items:center; gap:10px;">
-                            <i class="fas fa-tshirt" style="color: ${jHome.color} !important; text-shadow: ${jHome.textShadow} !important; font-size:1.1rem;"></i>
-                            <span class="team-player-name" id="${stageId}-m${idx}-team1" style="font-weight:600; color:${m.home === 'TBD' ? '#8b949e' : '#c9d1d9'}">${m.home}</span>
+                card.innerHTML = `
+                    <div class="match-teams-block" style="display:flex; flex-direction:column; gap:12px; flex-grow:1;">
+                        <div class="team-row-node" style="display:flex; justify-content:space-between; align-items:center;">
+                            <div class="team-identity-wrapper" style="display:flex; align-items:center; gap:10px;">
+                                <i class="fas fa-tshirt" style="color: ${jHome.color} !important; text-shadow: ${jHome.textShadow} !important; font-size:11rem;"></i>
+                                <span class="team-player-name" id="${stageId}-m${idx}-team1" style="font-weight:600; color:${m.home === 'TBD' ? '#8b949e' : '#c9d1d9'}">${m.home}</span>
+                            </div>
+                            <div class="team-score-wrapper" style="display:flex; gap:15px; align-items:center;">
+                                <span class="team-poss-pct" style="font-size:0.75rem; color:#8b949e; min-width:35px; text-align:right;">${pA}</span>
+                                <span class="team-goals-num" style="font-weight:bold; font-size:1.1rem; color:#58a6ff; min-width:15px; text-align:right;">${hScoreText}</span>
+                            </div>
                         </div>
-                        <div class="team-score-wrapper" style="display:flex; gap:15px; align-items:center;">
-                            <span class="team-poss-pct" style="font-size:0.75rem; color:#8b949e; min-width:35px; text-align:right;">${pA}</span>
-                            <span class="team-goals-num" style="font-weight:bold; font-size:1.1rem; color:#58a6ff; min-width:15px; text-align:right;">${hScoreText}</span>
+                        <div class="team-row-node" style="display:flex; justify-content:space-between; align-items:center;">
+                            <div class="team-identity-wrapper" style="display:flex; align-items:center; gap:10px;">
+                                <i class="fas fa-tshirt" style="color: ${jAway.color} !important; text-shadow: ${jAway.textShadow} !important; font-size:11rem;"></i>
+                                <span class="team-player-name" id="${stageId}-m${idx}-team2" style="font-weight:600; color:${m.away === 'TBD' ? '#8b949e' : '#c9d1d9'}">${m.away}</span>
+                            </div>
+                            <div class="team-score-wrapper" style="display:flex; gap:15px; align-items:center;">
+                                <span class="team-poss-pct" style="font-size:0.75rem; color:#8b949e; min-width:35px; text-align:right;">${pB}</span>
+                                <span class="team-goals-num" style="font-weight:bold; font-size:1.1rem; color:#58a6ff; min-width:15px; text-align:right;">${aScoreText}</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="team-row-node" style="display:flex; justify-content:space-between; align-items:center;">
-                        <div class="team-identity-wrapper" style="display:flex; align-items:center; gap:10px;">
-                            <i class="fas fa-tshirt" style="color: ${jAway.color} !important; text-shadow: ${jAway.textShadow} !important; font-size:1.1rem;"></i>
-                            <span class="team-player-name" id="${stageId}-m${idx}-team2" style="font-weight:600; color:${m.away === 'TBD' ? '#8b949e' : '#c9d1d9'}">${m.away}</span>
-                        </div>
-                        <div class="team-score-wrapper" style="display:flex; gap:15px; align-items:center;">
-                            <span class="team-poss-pct" style="font-size:0.75rem; color:#8b949e; min-width:35px; text-align:right;">${pB}</span>
-                            <span class="team-goals-num" style="font-weight:bold; font-size:1.1rem; color:#58a6ff; min-width:15px; text-align:right;">${aScoreText}</span>
-                        </div>
+                    <div class="match-status-action-box" style="display:flex; flex-direction:column; align-items:flex-end; gap:6px; margin-left:15px; border-left:1px solid #21262d; padding-left:15px; min-width:80px;">
+                        <span class="match-time-status" style="font-weight:bold; color: ${m.played ? '#ff7b72' : '#58a6ff'}; font-size:0.85rem;">${m.played ? 'FT' : m.timeSlot}</span>
+                        ${isAdminLoggedIn && m.home !== "TBD" && m.away !== "TBD" ? `<button class="update-score-btn" onclick="openWcScoreModal('${m.id}')" style="padding:4px 8px; background:#21262d; border:1px solid #30363d; color:#c9d1d9; border-radius:4px; cursor:pointer; font-size:0.75rem;"><i class="fas fa-edit"></i> Score</button>` : `<span class="match-status-label" style="font-size:0.75rem; color:#8b949e;">${m.played ? 'Finished' : 'Scheduled'}</span>`}
                     </div>
-                </div>
-                <div class="match-status-action-box" style="display:flex; flex-direction:column; align-items:flex-end; gap:6px; margin-left:15px; border-left:1px solid #21262d; padding-left:15px; min-width:80px;">
-                    <span class="match-time-status" style="font-weight:bold; color: ${m.played ? '#ff7b72' : '#58a6ff'}; font-size:0.85rem;">${m.played ? 'FT' : m.timeSlot}</span>
-                    ${isAdminLoggedIn && m.home !== "TBD" && m.away !== "TBD" ? `<button class="update-score-btn" onclick="openWcScoreModal('${m.id}')" style="padding:4px 8px; background:#21262d; border:1px solid #30363d; color:#c9d1d9; border-radius:4px; cursor:pointer; font-size:0.75rem;"><i class="fas fa-edit"></i> Score</button>` : `<span class="match-status-label" style="font-size:0.75rem; color:#8b949e;">${m.played ? 'Finished' : 'Scheduled'}</span>`}
-                </div>
-            `;
-            grid.appendChild(card);
-        });
+                `;
+                grid.appendChild(card);
+            });
+        }
     });
 }
 
-// 💡 ৬. অটো-নকআউট কোয়ালিফায়ার ক্যালকুলেশন ENGINE
+// 🏆 ৬. অটো-নকআউট কোয়ালিফায়ার ক্যালকুলেশন ENGINE
 function checkAndPopulateKnockouts(wc) {
     if (!wc) return;
     
-    // ১. সব গ্রুপ ম্যাচ শেষ কি না তা যাচাই করা
     let allPlayed = true;
     wc.fixtures.forEach(f => {
         if (f.stage === "Group Stage") {
@@ -556,7 +610,6 @@ function checkAndPopulateKnockouts(wc) {
     });
     if (!allPlayed) return;
 
-    // ২. প্রতিটি গ্রুপের বিজয়ী ও রানার-আপ আলাদা লিস্টে রাখা
     let winners = [];
     let runnersUp = [];
     
@@ -567,11 +620,13 @@ function checkAndPopulateKnockouts(wc) {
             if (f.stage === "Group Stage") {
                 f.matches.forEach(m => {
                     if (m.group === gLetter && m.played) {
-                        stats[m.home.trim()].gf += m.homeScore; stats[m.home.trim()].ga += m.awayScore;
-                        stats[m.away.trim()].gf += m.awayScore; stats[m.away.trim()].ga += m.homeScore;
-                        if (m.homeScore > m.awayScore) stats[m.home.trim()].pts += 3;
-                        else if (m.homeScore < m.awayScore) stats[m.away.trim()].pts += 3;
-                        else { stats[m.home.trim()].pts += 1; stats[m.away.trim()].pts += 1; }
+                        if(stats[m.home.trim()] && stats[m.away.trim()]) {
+                            stats[m.home.trim()].gf += m.homeScore; stats[m.home.trim()].ga += m.awayScore;
+                            stats[m.away.trim()].gf += m.awayScore; stats[m.away.trim()].ga += m.homeScore;
+                            if (m.homeScore > m.awayScore) stats[m.home.trim()].pts += 3;
+                            else if (m.homeScore < m.awayScore) stats[m.away.trim()].pts += 3;
+                            else { stats[m.home.trim()].pts += 1; stats[m.away.trim()].pts += 1; }
+                        }
                     }
                 });
             }
@@ -586,13 +641,11 @@ function checkAndPopulateKnockouts(wc) {
         runnersUp.push(sorted[1].name); 
     });
 
-    // ৩. নকআউট রাউন্ডে টিম সেটআপ (ক্রস-ম্যাচিং লজিক)
     let knockoutStages = wc.fixtures.filter(f => f.stage !== "Group Stage");
     if (knockoutStages.length > 0) {
         let firstStage = knockoutStages[0];
         firstStage.matches.forEach((m, idx) => {
             if (m.home === "TBD" && winners[idx] && runnersUp[idx]) {
-                // লজিক: বিজয়ী বনাম রানার-আপ ম্যাচ
                 m.home = winners[idx % winners.length];
                 m.away = runnersUp[(idx + 1) % runnersUp.length];
             }
@@ -600,8 +653,10 @@ function checkAndPopulateKnockouts(wc) {
     }
 
     promoteKnockoutWinners(wc);
+    if (window.fbSet && window.fbRef && window.fbDatabase) {
+        window.fbSet(window.fbRef(window.fbDatabase, 'standard_worldcup'), wcTournaments);
+    }
     localStorage.setItem("efootballWorldCups", JSON.stringify(wcTournaments));
-    updateKnockoutUI(wc);
 }
 
 function promoteKnockoutWinners(wc) {
@@ -632,6 +687,7 @@ function promoteKnockoutWinners(wc) {
 // ==========================================================================
 function openWcScoreModal(matchId) {
     const wc = wcTournaments.find(w => w.id === currentWcId);
+    if (!wc) return;
     let match = null;
     wc.fixtures.forEach(f => {
         let m = f.matches.find(x => x.id === matchId);
@@ -682,13 +738,17 @@ function saveMatchResult() {
         currentEditingWcMatch.awayPenalty = parseInt(pB || 0);
     }
 
+    // ফায়ারবেস রিয়েল-টাইম ডাটাবেজে ক্লাউড আপডেট পুশ
+    if (window.fbSet && window.fbRef && window.fbDatabase) {
+        window.fbSet(window.fbRef(window.fbDatabase, 'standard_worldcup'), wcTournaments);
+    }
+
     localStorage.setItem("efootballWorldCups", JSON.stringify(wcTournaments));
     closeScoreModal();
     
     const grid = document.getElementById("tab-table-content");
     if (grid && grid.style.display === "block") calculateWcGroups();
     else renderWcFixtures();
-    updateKnockoutUI(wcTournaments.find(w => w.id === currentWcId));
 }
 
 // ==========================================================================
@@ -725,7 +785,9 @@ function calculateWcLiveResults() {
 
     if (playedCount === 0) {
         let empty = `<span class="no-data-text"><i class="fas fa-hourglass-start"></i> No matches played yet</span>`;
-        champBox.innerHTML = empty; runnerBox.innerHTML = empty; scorerBox.innerHTML = empty;
+        if(champBox) champBox.innerHTML = empty; 
+        if(runnerBox) runnerBox.innerHTML = empty; 
+        if(scorerBox) scorerBox.innerHTML = empty;
         return;
     }
 
@@ -737,34 +799,39 @@ function calculateWcLiveResults() {
             runner = finalMatch.homePenalty > finalMatch.awayPenalty ? finalMatch.away : finalMatch.home;
         }
 
-        champBox.innerHTML = `<span class="winner-name" style="color:#ffd700; font-weight:bold;"><i class="fas fa-trophy"></i> ${winner}</span>`;
-        runnerBox.innerHTML = `<span class="winner-name" style="color:#c0c0c0; font-weight:bold;"><i class="fas fa-medal"></i> ${runner}</span>`;
+        if(champBox) champBox.innerHTML = `<span class="winner-name" style="color:#ffd700; font-weight:bold;"><i class="fas fa-trophy"></i> ${winner}</span>`;
+        if(runnerBox) runnerBox.innerHTML = `<span class="winner-name" style="color:#c0c0c0; font-weight:bold;"><i class="fas fa-medal"></i> ${runner}</span>`;
     } else {
-        champBox.innerHTML = `<span class="winner-name" style="font-size:1.1rem; color:#ffd700;"><i class="fas fa-spinner fa-spin"></i> Tournament Live...</span>`;
-        runnerBox.innerHTML = `<span class="winner-name" style="font-size:1.1rem; color:#c0c0c0;"><i class="fas fa-spinner fa-spin"></i> Tournament Live...</span>`;
+        if(champBox) champBox.innerHTML = `<span class="winner-name" style="font-size:11rem; color:#ffd700;"><i class="fas fa-spinner fa-spin"></i> Tournament Live...</span>`;
+        if(runnerBox) runnerBox.innerHTML = `<span class="winner-name" style="font-size:11rem; color:#c0c0c0;"><i class="fas fa-spinner fa-spin"></i> Tournament Live...</span>`;
     }
 
-    let sortedScorers = Object.values(goalStats).sort((a,b) => b.goals - a.goals);
-    let topScorer = sortedScorers[0];
+    if(scorerBox) {
+        let sortedScorers = Object.values(goalStats).sort((a,b) => b.goals - a.goals);
+        let topScorer = sortedScorers[0];
 
-    if (topScorer && topScorer.goals > 0) {
-        let nation = wc.playerNations[topScorer.name] || "TBD";
-        let jStyle = NAT_JERSEY_STYLES[nation] || { color: "#fff" };
-        scorerBox.innerHTML = `
-            <div class="result-identity-row" style="display:flex; align-items:center; gap:8px; justify-content:center;">
-                <i class="fas fa-tshirt" style="color: ${jStyle.color}; font-size: 1.2rem;"></i>
-                <span class="winner-name" style="font-weight:bold;">${topScorer.name}</span>
-            </div>
-            <div class="winner-meta-sub" style="color:#ff7b72; font-weight:bold; margin-top:5px;"><i class="fas fa-futbol"></i> Total Goals: ${topScorer.goals}</div>
-        `;
-    } else {
-        scorerBox.innerHTML = `<span class="no-data-text">No goals scored yet</span>`;
-    }
-
-    // [নতুন ফায়ারবেস ইন্টিগ্রেশন]: লাইভ স্কোর বা রেজাল্ট আপডেট হলে তা স্ট্যান্ডার্ড ওয়ার্ল্ডকাপ পাথে অটো-সিঙ্ক হবে
-    if (window.fbSet && window.fbRef && window.fbDatabase) {
-        window.fbSet(window.fbRef(window.fbDatabase, 'standard_worldcup'), wcTournaments)
-        .then(() => console.log("স্ট্যান্ডার্ড ওয়ার্ল্ড কাপ লাইভ ডেটা ফায়ারবেসে সিঙ্ক হয়েছে!"))
-        .catch(err => console.error("ফায়ারবেস সিঙ্ক এরর:", err));
+        if (topScorer && topScorer.goals > 0) {
+            let nation = wc.playerNations[topScorer.name] || "TBD";
+            let jStyle = NAT_JERSEY_STYLES[nation] || { color: "#fff" };
+            scorerBox.innerHTML = `
+                <div class="result-identity-row" style="display:flex; align-items:center; gap:8px; justify-content:center;">
+                    <i class="fas fa-tshirt" style="color: ${jStyle.color}; font-size: 1.2rem;"></i>
+                    <span class="winner-name" style="font-weight:bold;">${topScorer.name}</span>
+                </div>
+                <div class="winner-meta-sub" style="color:#ff7b72; font-weight:bold; margin-top:5px;"><i class="fas fa-futbol"></i> Total Goals: ${topScorer.goals}</div>
+            `;
+        } else {
+            scorerBox.innerHTML = `<span class="no-data-text">No goals scored yet</span>`;
+        }
     }
 }
+
+// এইচটিএমএল মডিউল আর্কিটেকচারের গ্লোবাল স্কোপ ম্যাপিং
+window.toggleCreateForm = toggleCreateForm;
+window.generateWorldCup = generateWorldCup;
+window.openWc = openWc;
+window.backToLeagueList = backToLeagueList;
+window.switchWcTab = switchWcTab;
+window.openWcScoreModal = openWcScoreModal;
+window.closeScoreModal = closeScoreModal;
+window.saveMatchResult = saveMatchResult;
