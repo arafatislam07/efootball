@@ -395,3 +395,46 @@ body {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-5px); }
 }
+
+/* ==========================================================================
+   📱 মোবাইলের জন্য এক্সক্লুসিভ রেসপনসিভ মিডিয়া কোয়েরি ফিক্স
+   ========================================================================== */
+@media (max-width: 768px) {
+    .google-matches-grid {
+        grid-template-columns: 1fr !important;
+        padding: 10px;
+        gap: 12px;
+    }
+    
+    .google-match-row {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        padding: 12px;
+        gap: 12px;
+    }
+
+    .match-meta-status {
+        border-left: none !important;
+        border-top: 1px dashed #222222;
+        padding-left: 0 !important;
+        padding-top: 10px !important;
+        margin-left: 0 !important;
+        min-width: 100% !important;
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+    }
+
+    .update-score-btn {
+        padding: 8px 16px !important;
+        font-size: 0.85rem !important;
+    }
+    
+    .leagues-grid {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .card-section {
+        padding: 15px;
+    }
+}
