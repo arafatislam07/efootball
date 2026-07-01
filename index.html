@@ -36,7 +36,7 @@
             transition: all 0.3s ease;
         }
 
-        /* মাউস নিলে হালকা জুম ও গ্লো বৃদ্ধি */
+        /* মাউস নিলে হালকা ஜুম ও গ্লো বৃদ্ধি */
         .top-header-logo:hover {
             transform: scale(1.05);
             filter: drop-shadow(0px 0px 15px rgba(255, 68, 68, 0.7));
@@ -116,36 +116,15 @@
 
             <div class="info-box">
                 <h3 id="title-tour-system"><i class="fas fa-cogs"></i> Tournament System</h3>
-                <ol id="tour-system-list" class="dynamic-list"></ol>
-                
                 <div id="admin-system-controls" class="admin-only-actions" style="display: none;"></div>
+                <ol id="tour-system-list" class="dynamic-list"></ol>
             </div>
         </div>
-    </main>
+    </container>
 
-    <div id="score-modal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeScoreModal()">&times;</span>
-            <h3><i class="fas fa-edit"></i> Update Match Score</h3>
-            <div class="modal-form">
-                <div class="modal-teams-row">
-                    <div class="modal-team-box">
-                        <span id="modal-teamA-name">Team A</span>
-                        <input type="number" id="modal-teamA-score" placeholder="Goals" min="0">
-                        <input type="number" id="modal-teamA-poss" placeholder="Possession %" min="0" max="100">
-                    </div>
-                    <div class="modal-vs">VS</div>
-                    <div class="modal-team-box">
-                        <span id="modal-teamB-name">Team B</span>
-                        <input type="number" id="modal-teamB-score" placeholder="Goals" min="0">
-                        <input type="number" id="modal-teamB-poss" placeholder="Possession %" min="0" max="100">
-                    </div>
-                </div>
-                <button onclick="saveMatchResult()" class="save-btn"><i class="fas fa-save"></i> Save Updates</button>
-            </div>
-        </div>
-    </div>
-
+    <!-- ==========================================================================
+       ফুটার এবং অ্যাডমিন বাটন
+       ========================================================================== -->
     <footer class="main-footer">
         <div id="admin-status">
             <button id="admin-login-btn" onclick="handleAdminAuth()"><i class="fas fa-lock"></i> Admin Login</button>

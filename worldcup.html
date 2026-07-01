@@ -4,16 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google" content="notranslate">
-    <title>Standard World Cup - eFootball Tournament Hub</title>
+    <title>League Mode - eFootball Tournament Hub</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="league-style.css"> 
+    <link rel="stylesheet" href="league-style.css">
 </head>
 <body>
 
     <header class="league-header">
         <div class="header-container">
             <button onclick="location.href='index.html'" class="back-btn"><i class="fas fa-arrow-left"></i> Home</button>
-            <h1 id="league-title">🏆 STANDARD WORLD CUP</h1>
+            <h1 id="league-title">📊 LEAGUE DASHBOARD</h1>
             <div id="admin-indicator" class="badge">Viewer Mode</div>
         </div>
     </header>
@@ -22,31 +22,31 @@
         
         <section id="league-list-section" class="card-section">
             <div class="section-header">
-                <h2><i class="fas fa-globe-asia"></i> Active World Cups</h2>
-                <button id="show-create-form-btn" onclick="toggleCreateForm()" style="display: none;"><i class="fas fa-plus"></i> Create World Cup</button>
+                <h2><i class="fas fa-list"></i> Active Leagues</h2>
+                <button id="show-create-form-btn" onclick="toggleCreateForm()" style="display: none;"><i class="fas fa-plus"></i> Create New League</button>
             </div>
             <div id="active-leagues-grid" class="leagues-grid"></div>
         </section>
 
-        <section id="create-wc-section" class="card-section" style="display: none;">
+        <section id="create-league-section" class="card-section" style="display: none;">
             <div class="section-header">
-                <h2><i class="fas fa-trophy"></i> Generate FIFA World Cup</h2>
+                <h2><i class="fas fa-trophy"></i> Create New eFootball League</h2>
                 <button onclick="toggleCreateForm()" class="back-btn"><i class="fas fa-times"></i> Cancel</button>
             </div>
             <div class="form-grid">
                 <div class="form-group">
                     <label>Tournament Name</label>
-                    <input type="text" id="wc-name-input" placeholder="e.g., JUST EEE World Cup 2026">
+                    <input type="text" id="league-name-input" placeholder="e.g., JUST EEE Premier League">
                 </div>
                 
                 <div class="form-group">
                     <label>Messenger Group Link</label>
-                    <input type="url" id="messenger-link-input" placeholder="Paste Messenger chat link...">
+                    <input type="url" id="messenger-link-input" placeholder="Paste Messenger chat link here...">
                 </div>
 
-                <div class="form-grid-row form-group-row">
+                <div class="form-group-row">
                     <div class="form-group">
-                        <label>Entry Fee</label>
+                        <label>Entry Fee (৳ / Free)</label>
                         <input type="text" id="prize-entry" placeholder="e.g., 50 or Free">
                     </div>
                     <div class="form-group">
@@ -54,11 +54,11 @@
                         <input type="number" id="prize-total" placeholder="Total ৳">
                     </div>
                     <div class="form-group">
-                        <label>Champion (৳)</label>
+                        <label>Champion (1st) (৳)</label>
                         <input type="number" id="prize-1st" placeholder="Champion ৳">
                     </div>
                     <div class="form-group">
-                        <label>Runner-up (৳)</label>
+                        <label>Runner-up (2nd) (৳)</label>
                         <input type="number" id="prize-2nd" placeholder="Runner-up ৳">
                     </div>
                     <div class="form-group">
@@ -68,49 +68,70 @@
                 </div>
 
                 <div class="form-group">
-                    <label><i class="far fa-calendar-check"></i> Select Matchdays per Week</label>
+                    <label><i class="far fa-calendar-check"></i> Select Days for Matchdays per Week</label>
                     <div class="days-checkbox-grid">
-                        <label><input type="checkbox" name="wc-days" value="0"> Sunday</label>
-                        <label><input type="checkbox" name="wc-days" value="1"> Monday</label>
-                        <label><input type="checkbox" name="wc-days" value="2"> Tuesday</label>
-                        <label><input type="checkbox" name="wc-days" value="3"> Wednesday</label>
-                        <label><input type="checkbox" name="wc-days" value="4"> Thursday</label>
-                        <label><input type="checkbox" name="wc-days" value="5"> Friday</label>
-                        <label><input type="checkbox" name="wc-days" value="6"> Saturday</label>
+                        <label><input type="checkbox" name="league-days" value="0"> Sunday</label>
+                        <label><input type="checkbox" name="league-days" value="1"> Monday</label>
+                        <label><input type="checkbox" name="league-days" value="2"> Tuesday</label>
+                        <label><input type="checkbox" name="league-days" value="3"> Wednesday</label>
+                        <label><input type="checkbox" name="league-days" value="4"> Thursday</label>
+                        <label><input type="checkbox" name="league-days" value="5"> Friday</label>
+                        <label><input type="checkbox" name="league-days" value="6"> Saturday</label>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label>Players Names (Bulk Input - Must be 4, 8, 16 or 32 players)</label>
-                    <textarea id="players-bulk-input" rows="6" placeholder="1. Arafat&#10;2. Musavvir&#10;3. Joy&#10;4. Tanvir"></textarea>
+                    <label>Players Names (Bulk Input - Paste List)</label>
+                    <textarea id="players-bulk-input" rows="6" placeholder="Paste players names here..."></textarea>
                 </div>
 
-                <button onclick="generateWorldCup()" class="submit-btn"><i class="fas fa-rocket"></i> Launch World Cup Tournament</button>
+                <button onclick="generateNewLeague()" class="submit-btn"><i class="fas fa-rocket"></i> Generate League & Fixtures</button>
             </div>
         </section>
 
         <section id="league-view-section" class="card-section" style="display: none;">
             <div class="league-view-header">
-                <button onclick="backToLeagueList()" class="back-link-btn"><i class="fas fa-chevron-left"></i> Back to Tournaments</button>
-                <h2 id="current-active-league-name">World Cup Name</h2>
+                <button onclick="backToLeagueList()" class="back-link-btn"><i class="fas fa-chevron-left"></i> Back to Leagues</button>
+                <h2 id="current-active-league-name">League Name</h2>
                 <a id="messenger-join-btn" href="#" target="_blank" class="messenger-btn"><i class="fab fa-messenger"></i> Join Messenger Group</a>
             </div>
 
             <div class="prize-info-bar">
-                <span><i class="fas fa-ticket-alt" style="color: #ffaa47;"></i> Entry: <strong id="view-prize-entry">Free</strong></span>
+                <span><i class="fas fa-ticket-alt" style="color: #ffaa47;"></i> Entry Fee: <strong id="view-prize-entry">Free</strong></span>
                 <span><i class="fas fa-hand-holding-usd"></i> Total Prize: <strong id="view-prize-total">৳0</strong></span>
-                <span><i class="fas fa-crown" style="color: gold;"></i> Champion: <strong id="view-prize-1st">৳0</strong></span>
-                <span><i class="fas fa-medal" style="color: silver;"></i> Runner-up: <strong id="view-prize-2nd">৳0</strong></span>
+                <span><i class="fas fa-crown" style="color: gold;"></i> Champion (1st): <strong id="view-prize-1st">৳0</strong></span>
+                <span><i class="fas fa-medal" style="color: silver;"></i> Runner-up (2nd): <strong id="view-prize-2nd">৳0</strong></span>
                 <span><i class="fas fa-shoe-prints" style="color: #ff7b72;"></i> Top Scorer (GF): <strong id="view-prize-scorer">৳0</strong></span>
             </div>
 
             <div class="tab-container">
-                <button id="tab-table-btn" class="tab-btn active" onclick="switchWcTab('table')"><i class="fas fa-boxes"></i> Group Standings</button>
-                <button id="tab-matches-btn" class="tab-btn" onclick="switchWcTab('matches')"><i class="fas fa-calendar-check"></i> Match Fixtures</button>
-                <button id="tab-result-btn" class="tab-btn" onclick="switchWcTab('result')"><i class="fas fa-award"></i> World Cup Result</button>
+                <button id="tab-table-btn" class="tab-btn active" onclick="switchTab('table')"><i class="fas fa-table"></i> Points Table</button>
+                <button id="tab-matches-btn" class="tab-btn" onclick="switchTab('matches')"><i class="fas fa-calendar-alt"></i> Matches</button>
+                <button id="tab-result-btn" class="tab-btn" onclick="switchTab('result')"><i class="fas fa-award"></i> Tournament Result</button>
             </div>
 
-            <div id="tab-table-content" class="tab-content"></div>
+            <div id="tab-table-content" class="tab-content">
+                <div class="table-responsive">
+                    <table class="standings-table">
+                        <thead>
+                            <tr>
+                                <th>Pos</th>
+                                <th>Player Name</th>
+                                <th>P</th>
+                                <th>W</th>
+                                <th>D</th>
+                                <th>L</th>
+                                <th>GF</th>
+                                <th>GA</th>
+                                <th>GD</th>
+                                <th>Possession %</th>
+                                <th>Pts</th>
+                            </tr>
+                        </thead>
+                        <tbody id="standings-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
 
             <div id="tab-matches-content" class="tab-content" style="display: none;">
                 <div id="matchdays-container"></div>
@@ -118,24 +139,34 @@
 
             <div id="tab-result-content" class="tab-content" style="display: none;">
                 <div class="live-result-dashboard-grid">
+                    
                     <div class="result-live-card gold-border">
-                        <div class="result-icon-crown"><i class="fas fa-trophy"></i></div>
-                        <h4>WORLD CUP CHAMPION</h4>
-                        <div id="live-champion-box" class="winner-identity-node"></div>
-                        <div class="result-prize-tag" id="live-champ-prize"></div>
+                        <div class="result-icon-crown"><i class="fas fa-crown"></i></div>
+                        <h4>CHAMPION</h4>
+                        <div id="live-champion-box" class="winner-identity-node">
+                            <span class="no-data-text">No matches played yet</span>
+                        </div>
+                        <div class="result-prize-tag" id="live-champ-prize">Prize: ৳0</div>
                     </div>
+
                     <div class="result-live-card silver-border">
                         <div class="result-icon-medal"><i class="fas fa-medal"></i></div>
                         <h4>RUNNER-UP</h4>
-                        <div id="live-runnerup-box" class="winner-identity-node"></div>
-                        <div class="result-prize-tag" id="live-runner-prize"></div>
+                        <div id="live-runnerup-box" class="winner-identity-node">
+                            <span class="no-data-text">No matches played yet</span>
+                        </div>
+                        <div class="result-prize-tag" id="live-runner-prize">Prize: ৳0</div>
                     </div>
+
                     <div class="result-live-card bronze-border">
                         <div class="result-icon-boot"><i class="fas fa-shoe-prints"></i></div>
-                        <h4>GOLDEN BOOT (TOP SCORER)</h4>
-                        <div id="live-topscorer-box" class="winner-identity-node"></div>
-                        <div class="result-prize-tag" id="live-scorer-prize"></div>
+                        <h4>TOP SCORER</h4>
+                        <div id="live-topscorer-box" class="winner-identity-node">
+                            <span class="no-data-text">No matches played yet</span>
+                        </div>
+                        <div class="result-prize-tag" id="live-scorer-prize">Prize: ৳0</div>
                     </div>
+
                 </div>
             </div>
         </section>
@@ -144,7 +175,7 @@
     <div id="score-modal" class="modal" style="display: none;">
         <div class="modal-content">
             <span class="close-modal" onclick="closeScoreModal()">&times;</span>
-            <h3><i class="fas fa-edit"></i> Update Match Score</h3>
+            <h3><i class="fas fa-edit"></i> Update Match Result</h3>
             <div class="modal-form">
                 <div class="modal-teams-row">
                     <div class="modal-team-box">
