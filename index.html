@@ -4,138 +4,258 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google" content="notranslate">
-    <title>eFootball Tournament Hub</title>
+    <title>BLADES OF VENGEANCE</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
-    
-    <style>
-        .main-header {
-            position: relative; /* লোগোকে এটার সাপেক্ষে বামে বসানোর জন্য */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px 0; /* হেডারের ভেতরের স্পেস একটু বাড়ানো হলো */
-        }
-
-        /* লোগো কন্টেইনার স্টাইল */
-        .top-header-logo-container {
-            position: absolute;
-            left: 40px; /* বাম কোণা থেকে গ্যাপ সামান্য বাড়ানো হলো যেন সুন্দর লাগে */
-            top: 50%;
-            transform: translateY(-50%); /* লম্বালম্বি একদম মাঝখানে রাখবে */
-            z-index: 10;
-        }
-
-        /* লোগো ইমেজ সাইজ ও গেমিং ইফেক্ট (সাইজ বড় করা হয়েছে) */
-        .top-header-logo {
-            height: 110px; /* লোগোটি এখন বেশ বড় এবং স্পষ্ট দেখাবে */
-            width: auto;
-            object-fit: contain;
-            filter: drop-shadow(0px 0px 10px rgba(255, 68, 68, 0.4)); /* গ্লো ইফেক্ট আরেকটু বাড়ানো হলো */
-            transition: all 0.3s ease;
-        }
-
-        /* মাউস নিলে হালকা ஜুম ও গ্লো বৃদ্ধি */
-        .top-header-logo:hover {
-            transform: scale(1.05);
-            filter: drop-shadow(0px 0px 15px rgba(255, 68, 68, 0.7));
-            cursor: pointer;
-        }
-
-        /* ছোট স্ক্রিন বা মোবাইলের জন্য রেসপনসিভ ডিজাইন */
-        @media (max-width: 768px) {
-            .main-header {
-                padding-top: 130px; /* মোবাইলে লোগো বড় হওয়ার কারণে ওপরের স্পেস বাড়ানো হলো */
-            }
-            .top-header-logo-container {
-                left: 50%;
-                top: 20px;
-                transform: translateX(-50%); /* মোবাইলে লোগোটি উপরে মাঝখানে চলে আসবে */
-            }
-            .top-header-logo {
-                height: 80px; /* মোবাইলের স্ক্রিন অনুযায়ী সাইজ */
-            }
-        }
-    </style>
 </head>
 <body>
 
-    <header class="main-header">
-        <div class="top-header-logo-container">
-            <img src="logo.png" alt="Tournament Logo" class="top-header-logo">
+    <!-- 📱 টপ অ্যাপ বার -->
+    <header class="app-top-bar">
+        <button class="hamburger-menu-btn" onclick="toggleHamburgerMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="brand-identity">
+            <img src="logo.png" alt="Logo" class="top-header-logo">
+            <h1 class="brand-name neon-title-main">BLADES OF VENGEANCE</h1>
         </div>
-        
-        <h1><i class="fas fa-trophy text-gold"></i> EFOOTBALL TOURNAMENT HUB</h1>
-        <p id="header-subtitle">Official eFootball Tournament Platform for Gamers</p>
+
+        <!-- ☰ জেনিথ স্টাইল সাইড ড্রয়ার মেনু (Screen 1/3 Layout) -->
+        <div id="hamburger-overlay" class="menu-overlay" onclick="toggleHamburgerMenu()"></div>
+        <div id="hamburger-dropdown" class="hamburger-panel">
+            <div class="side-nav-header">
+                <span class="side-brand-name neon-title-side">BLADES OF VENGEANCE</span>
+                <button class="close-side-nav" onclick="toggleHamburgerMenu()">&times;</button>
+            </div>
+            
+            <div class="menu-status-bar-sync">
+                <span id="admin-mode-badge" class="badge-viewer">Viewer Mode</span>
+                <button id="admin-action-toggle-btn" class="menu-action-inline-btn" onclick="handleAdminAuth()"><i class="fas fa-lock"></i> Admin Login</button>
+            </div>
+            
+            <div class="side-menu-items">
+                <span class="menu-group-title">COMPETE & PLAY</span>
+                <a href="#" class="menu-item" onclick="handleClubMembersClick()"><i class="fas fa-users-cog"></i> Club Members</a>
+                <a href="#" class="menu-item" onclick="openPlayerRegistration()"><i class="fas fa-user-plus"></i> Player Registration</a>
+                <a href="#" class="menu-item" id="admin-news-upload-trigger" style="display: none;" onclick="openAdminNewsModal()"><i class="fas fa-image"></i> Upload News Banner</a>
+                
+                <span class="menu-group-title">COMMUNICATION</span>
+                <a href="https://facebook.com" target="_blank" class="menu-item"><i class="fab fa-facebook text-pest"></i> FB Page</a>
+                <a href="https://discord.com" target="_blank" class="menu-item"><i class="fab fa-discord text-pest"></i> Discord</a>
+                <a href="https://messenger.com" target="_blank" class="menu-item"><i class="fab fa-facebook-messenger text-pest"></i> Messenger Group</a>
+            </div>
+        </div>
     </header>
 
-    <main class="container">
-        <h2 class="section-title" id="main-section-title">CHOOSE A GAME MODE</h2>
-        
-        <div class="game-modes-grid">
+    <!-- 📸 ডাইনামিক নিউজ ব্যানার স্লাইডার সেকশন -->
+    <section id="home-news-section" class="app-page-content active-page">
+        <div class="slider-wrapper">
+            <div id="news-slider-container" class="news-carousel-track">
+                <div class="slide-node active-slide">
+                    <div class="placeholder-banner">
+                        <h3 class="neon-text-blue">Welcome to Blades of Vengeance Tournament Platform</h3>
+                        <p>Stay tuned for live updates, scores, and upcoming match schedules!</p>
+                    </div>
+                </div>
+            </div>
+            <div id="slider-dots-indicator" class="carousel-dots"></div>
+        </div>
+
+        <!-- ⚽ প্লেয়ার টিম ম্যানেজমেন্ট সেকশন (ছোট বার ও সার্চ সিস্টেম) -->
+        <div class="teams-management-section">
             
+            <!-- ১. মেইন টিম বার -->
+            <div class="team-toggle-bar">
+                <div class="team-bar-header" onclick="toggleTeamCollapse('main-team-content')">
+                    <span><i class="fas fa-star text-pest"></i> Main Team</span>
+                    <i class="fas fa-chevron-down arrow-icon"></i>
+                </div>
+                <div id="main-team-content" class="team-collapsible-content">
+                    <div class="admin-search-box-wrap admin-only-view" style="display:none;">
+                        <input type="text" id="search-main-input" placeholder="Enter eFootball ID to add...">
+                        <button onclick="addPlayerToTeam('main')">Add Player</button>
+                    </div>
+                    <div id="main-team-cards-grid" class="mini-cards-flex-grid"></div>
+                </div>
+            </div>
+
+            <!-- ২. একাডেমি টিম বার -->
+            <div class="team-toggle-bar">
+                <div class="team-bar-header" onclick="toggleTeamCollapse('academy-team-content')">
+                    <span><i class="fas fa-shield-alt text-pest"></i> Academy Team</span>
+                    <i class="fas fa-chevron-down arrow-icon"></i>
+                </div>
+                <div id="academy-team-content" class="team-collapsible-content">
+                    <div class="admin-search-box-wrap admin-only-view" style="display:none;">
+                        <input type="text" id="search-academy-input" placeholder="Enter eFootball ID to add...">
+                        <button onclick="addPlayerToTeam('academy')">Add Player</button>
+                    </div>
+                    <div id="academy-team-cards-grid" class="mini-cards-flex-grid"></div>
+                </div>
+            </div>
+
+            <!-- ৩. ওয়ার্ল্ডওয়াইড প্লেয়ার বার -->
+            <div class="team-toggle-bar">
+                <div class="team-bar-header" onclick="toggleTeamCollapse('worldwide-team-content')">
+                    <span><i class="fas fa-globe text-pest"></i> Worldwide Player</span>
+                    <i class="fas fa-chevron-down arrow-icon"></i>
+                </div>
+                <div id="worldwide-team-content" class="team-collapsible-content">
+                    <div id="worldwide-team-cards-grid" class="mini-cards-flex-grid"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 📤 ২. ব্যানার আপলোডের জন্য ডেডিকেটেড মিনি পেজ মডাল ওভারলে -->
+    <div id="admin-news-modal" class="reg-modal-overlay" style="display: none;">
+        <div class="reg-modal-content mini-page-upload">
+            <div class="reg-modal-header">
+                <h3 class="neon-text-red"><i class="fas fa-upload"></i> Post a New Banner / Notice</h3>
+                <button class="close-reg-modal" onclick="closeAdminNewsModal()">&times;</button>
+            </div>
+            <div class="reg-form-body">
+                <div class="reg-input-group">
+                    <label>Upload Banner File:</label>
+                    <input type="file" id="news-file-input" accept="image/*" class="file-input-custom">
+                    <input type="text" id="news-img-url-input" placeholder="Or paste image URL link here...">
+                </div>
+                <div class="reg-input-group">
+                    <label>Banner Caption (Unlimited Text Line-by-Line):</label>
+                    <textarea id="news-caption-input" placeholder="Enter notice description here... No limit!" rows="4"></textarea>
+                </div>
+                <button type="button" class="reg-submit-btn" onclick="submitNewBannerData()">Publish Banner</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🆔 প্লেয়ার রেজিস্ট্রেশন মডাল প্যানেল -->
+    <div id="player-reg-modal" class="reg-modal-overlay" style="display: none;">
+        <div class="reg-modal-content">
+            <div class="reg-modal-header">
+                <h3 class="neon-text-red"><i class="fas fa-user-shield"></i> BOV Player Registration</h3>
+                <button class="close-reg-modal" onclick="closePlayerRegistration()">&times;</button>
+            </div>
+            <div class="reg-form-body">
+                <div class="unique-avatar-frame-container">
+                    <div class="gaming-photo-frame" id="reg-frame-preview">
+                        <i class="fas fa-camera-retro frame-placeholder-icon"></i>
+                    </div>
+                    <span class="frame-label">Unique Card Frame</span>
+                </div>
+                
+                <div class="form-grid-panel">
+                    <div class="reg-input-group">
+                        <label>Player Name:</label>
+                        <input type="text" id="reg-player-name" placeholder="Enter Real Name...">
+                    </div>
+                    <div class="reg-input-group">
+                        <label>eFootball ID (Main Unique ID):</label>
+                        <input type="text" id="reg-efootball-id" placeholder="Enter eFootball Unique ID...">
+                    </div>
+                    <div class="reg-input-group">
+                        <label>Device Name:</label>
+                        <input type="text" id="reg-device-name" placeholder="e.g. iPhone 15 Pro, Poco X3...">
+                    </div>
+                    <div class="reg-input-group">
+                        <label>Facebook Profile Link:</label>
+                        <input type="text" id="reg-fb-link" placeholder="https://facebook.com/username...">
+                    </div>
+                    <div class="reg-input-group">
+                        <label>Upload Profile Image Link:</label>
+                        <input type="text" id="reg-player-pic-url" placeholder="Paste direct image link...">
+                        <input type="file" id="reg-player-pic-file" accept="image/*" class="file-input-custom" style="margin-top:5px;">
+                    </div>
+                    
+                    <button type="button" class="reg-submit-btn" onclick="handleRealPlayerRegistration()">Register Player</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ℹ️ প্লেয়ার ডিটেইলস পপআপ মডাল কার্ড (Mini ID Card এ ক্লিক করলে খুলবে) -->
+    <div id="player-details-modal" class="reg-modal-overlay" style="display: none;">
+        <div class="reg-modal-content profile-details-card">
+            <div class="reg-modal-header">
+                <h3><i class="fas fa-id-card"></i> Player Details Card</h3>
+                <button class="close-reg-modal" onclick="closePlayerDetailsModal()">&times;</button>
+            </div>
+            <div class="reg-form-body id-card-inner-view" id="player-details-view-target">
+                <!-- জাভাস্ক্রিপ্ট দিয়ে কার্ডের ভেতরের ডাটা তৈরি হবে -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ⚽ টুর্নামেন্ট ইভেন্ট সেকশন -->
+    <section id="event-tournament-section" class="app-page-content">
+        <h2 class="section-title neon-title-main" id="main-section-title">CHOOSE A GAME MODE</h2>
+        <div class="game-modes-grid">
             <div class="mode-card" onclick="location.href='league.html'">
-                <div class="mode-icon"><i class="fas fa-chart-bar" style="color: #58a6ff;"></i></div>
+                <div class="mode-icon"><i class="fas fa-chart-bar"></i></div>
                 <h3>League Mode</h3>
                 <p class="mode-desc">Played 2 days a week, 1 match a day. Full round-robin league fixtures.</p>
             </div>
-
             <div class="mode-card" onclick="location.href='worldcup.html'">
-                <div class="mode-icon"><i class="fas fa-globe-americas" style="color: #ff7b72;"></i></div>
+                <div class="mode-icon"><i class="fas fa-globe-americas"></i></div>
                 <h3>Standard World Cup</h3>
                 <p class="mode-desc">Classic International Group and Knockout Stage with 4, 8, 16, or 32 teams.</p>
             </div>
-
             <div class="mode-card" onclick="location.href='special-worldcup.html'">
-                <div class="mode-icon"><i class="fas fa-fire" style="color: #ffa657;"></i></div>
+                <div class="mode-icon"><i class="fas fa-fire"></i></div>
                 <h3>Special World Cup</h3>
                 <p class="mode-desc">The official FIFA format with 48 fixed teams and the best 3rd place logic.</p>
             </div>
-
             <div class="mode-card" onclick="location.href='ucl.html'">
-                <div class="mode-icon"><i class="fas fa-star" style="color: #f2ca22;"></i></div>
+                <div class="mode-icon"><i class="fas fa-star"></i></div>
                 <h3>UCL Mode</h3>
                 <p class="mode-desc">Multiples of 4 are high-voltage knockouts based on the team, group stage and home-away.</p>
             </div>
         </div>
+    </section>
 
-        <hr class="divider">
-
-        <div class="translate-container">
+    <!-- 📜 রুলস সেকশন -->
+    <section id="rules-board-section" class="app-page-content">
+        <div class="translate-container" style="margin: 15px 0; display: flex; justify-content: flex-end;">
             <button id="lang-toggle-btn" onclick="toggleLanguage()"><i class="fas fa-language"></i> English</button>
         </div>
-
         <div class="info-panel">
             <div class="info-box">
-                <h3 id="title-players-rules"><i class="fas fa-users"></i> Players Rules</h3>
-                <ol id="players-rules-list" class="dynamic-list"></ol>
-                
+                <h3 id="title-players-rules" class="neon-text-blue"><i class="fas fa-users"></i> Players Rules</h3>
+                <ol id="players-rules-list" class="dynamic-list unlimited-text-render"></ol>
                 <div id="admin-rules-controls" class="admin-only-actions" style="display: none;"></div>
             </div>
-
             <div class="info-box">
-                <h3 id="title-tour-system"><i class="fas fa-cogs"></i> Tournament System</h3>
+                <h3 id="title-tour-system" class="neon-text-blue"><i class="fas fa-cogs"></i> Tournament System</h3>
                 <div id="admin-system-controls" class="admin-only-actions" style="display: none;"></div>
-                <ol id="tour-system-list" class="dynamic-list"></ol>
+                <ol id="tour-system-list" class="dynamic-list unlimited-text-render"></ol>
             </div>
         </div>
-    </container>
+    </section>
 
-    <!-- ==========================================================================
-       ফুটার এবং অ্যাডমিন বাটন
-       ========================================================================== -->
-    <footer class="main-footer">
-        <div id="admin-status">
-            <button id="admin-login-btn" onclick="handleAdminAuth()"><i class="fas fa-lock"></i> Admin Login</button>
-        </div>
-    </footer>
+    <!-- 📱 মডার্ন বটম নেভিগেশন বার -->
+    <nav class="app-bottom-nav">
+        <button class="nav-tab-node active-tab" onclick="switchAppView('home')">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </button>
+        <button class="nav-tab-node" onclick="switchAppView('event')">
+            <i class="fas fa-trophy"></i>
+            <span>Event</span>
+        </button>
+        <button class="nav-tab-node" onclick="switchAppView('rules')">
+            <i class="fas fa-gavel"></i>
+            <span>Rules</span>
+        </button>
+        <button class="nav-tab-node" onclick="switchAppView('ranking')">
+            <i class="fas fa-chart-line"></i>
+            <span>Ranking</span>
+        </button>
+    </nav>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getDatabase, ref, set, onValue, remove, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-        // ফায়ারবেস কনফিগারেশন (আপনার একদম নতুন জিমেইল প্রজেক্টের কনফিগ)
         const firebaseConfig = {
             apiKey: "AIzaSyAyALeCHqPLxgHYNgHtdPpCfIE_MX6em_c",
             authDomain: "efootball-tournament-hub.firebaseapp.com",
@@ -146,20 +266,11 @@
             appId: "1:552060471013:web:18293ad6c1389a8320360c",
             measurementId: "G-HHYQH81CZB"
         };
-
-        // ইনিশিয়ালাইজেশন
         const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app);
-
-        // Fungsi-fungsi dimasukkan ke global window object agar script.js mudah mengaksesnya
-        window.fbDatabase = database;
-        window.fbRef = ref;
-        window.fbSet = set;
-        window.fbOnValue = onValue;
-        window.fbRemove = remove;
-        window.fbPush = push;
+        window.fbDatabase = getDatabase(app);
+        window.fbRef = ref; window.fbSet = set; window.fbOnValue = onValue; window.fbRemove = remove; window.fbPush = push;
     </script>
-
     <script type="module" src="script.js"></script>
+    <script type="module" src="players-db.js"></script>
 </body>
 </html>

@@ -1,252 +1,868 @@
+/* ==========================================================================
+   eFootball Tournament Hub - Pure Dark Black & Pest Symbol Premium Base
+   ========================================================================== */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    -webkit-tap-highlight-color: transparent;
 }
 
 body {
-    background-color: #000000; /* একদম কুচকুচে ডার্ক ব্ল্যাক ব্যাকগ্রাউন্ড */
-    color: #ffffff;            /* সব জেনারেল টেক্সট পিওর সাদা */
+    background-color: #000000 !important; /* একদম কুচকুচে পিওর ব্ল্যাক স্ক্রিন */
+    color: #e2e8f0;                       /* সব জেনারেল টেক্সট ডার্ক হোয়াইট */
     line-height: 1.6;
-    padding-bottom: 80px;
+    padding-top: 75px;         
+    padding-bottom: 85px;      
 }
 
 .container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 15px;
 }
 
-.main-header {
-    background: #121212; /* হালকা কালো চারকোল শেড বার */
-    text-align: center;
-    padding: 40px 20px;
-    border-bottom: 3px solid #1f6feb;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.8);
-}
-
-.main-header h1 {
-    color: #ffffff; /* হেডিং টেক্সট পিওর সাদা */
-    font-size: 2.5rem;
-    margin-bottom: 10px;
+/* ==========================================================================
+   ✨ গাঢ় নিওন ব্লু এবং গাঢ় রেড স্টাইলিশ হেডিং গ্রেডিয়েন্ট ও লাইটিং ইফেক্টস
+   ========================================================================== */
+.neon-title-main {
+    font-weight: 900 !important;
     text-transform: uppercase;
+    background: linear-gradient(135deg, #ff3333, #3366ff); /* গাঢ় রেড ও ব্লু গ্রেডিয়েন্ট */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0px 0px 8px rgba(51, 102, 255, 0.6));
     letter-spacing: 1px;
 }
 
-/* গোল্ডেন ট্রফি কালার */
-.text-gold {
-    color: #ffd700;
+.neon-title-side {
+    font-weight: 800;
+    background: linear-gradient(135deg, #3366ff, #ff3333);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
-.main-header p {
-    color: #ffffff; /* সাবটাইটেল টেক্সট পিওর সাদা */
-    font-size: 1.1rem;
+.neon-text-blue {
+    color: #e2e8f0 !important;
+    text-shadow: 0 0 10px rgba(51, 102, 255, 0.8), 0 0 20px rgba(51, 102, 255, 0.4);
 }
+
+.neon-text-red {
+    color: #e2e8f0 !important;
+    text-shadow: 0 0 10px rgba(255, 51, 51, 0.8), 0 0 20px rgba(255, 51, 51, 0.4);
+}
+
+/* ==========================================================================
+   🎨 সব আইকন ও সিম্বলের জন্য স্পেশাল পেস্ট কালার (Pest Color Fix)
+   ========================================================================== */
+.text-pest, i, .mode-icon i, .nav-tab-node i, .menu-item i, .category-row-line i, .arrow-icon {
+    color: #00f5d4 !important; /* চোখ ধাঁধানো নিখুঁত পেস্ট কালার */
+}
+
+/* ==========================================================================
+   📱 টপ অ্যাপ বার ও লোগো অরিজিনাল শেপ ফিক্স
+   ========================================================================== */
+.app-top-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 70px;
+    background-color: #0a0a0a; /* কুচকুচে কালোর একদম কাছাকাছি সূক্ষ্ম ডার্ক শেড */
+    border-bottom: 1px solid #1a1a1a;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 0 20px;
+    z-index: 1000;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.7);
+    gap: 15px;
+}
+
+.brand-identity {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* লোগোর গোল সার্কেল তুলে দিয়ে অরিজিনাল শেপ লকিং */
+.top-header-logo {
+    display: inline-block !important;
+    height: 42px !important;
+    width: auto !important; /* অরিজিনাল উইথ রেশিও */
+    border-radius: 0% !important; /* গোল হবে না, যেমন আছে তেমন থাকবে */
+    object-fit: contain !important;
+    filter: drop-shadow(0px 0px 8px rgba(0, 245, 212, 0.4));
+}
+
+.brand-name {
+    font-size: 1.15rem;
+}
+
+.hamburger-menu-btn {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    cursor: pointer;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ==========================================================================
+   ☰ বাম পাশের ৩-বার সাইডবার (Screen 1/3 Layout & Upper Sync Bar)
+   ========================================================================== */
+.menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.75);
+    z-index: 1001;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.menu-overlay.show {
+    display: block;
+    opacity: 1;
+}
+
+.hamburger-panel {
+    position: fixed;
+    top: 0;
+    left: -360px; 
+    width: 360px; /* স্ক্রিনের চওড়ার পারফেক্ট ১/৩ অংশ */
+    max-width: 85vw;
+    height: 100%;
+    background-color: #050505;
+    border-right: 1px solid #1a1a1a;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 6px 0 25px rgba(0, 0, 0, 0.8);
+    z-index: 1002;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hamburger-panel.show {
+    left: 0; 
+}
+
+.side-nav-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid #1a1a1a;
+}
+
+.close-side-nav {
+    background: none;
+    border: none;
+    color: #e2e8f0;
+    font-size: 1.8rem;
+    cursor: pointer;
+}
+
+/* ব্যাজ এবং লগইন বাটন একই লাইনে পাশাপাশি সিঙ্ক এরিয়া */
+.menu-status-bar-sync {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 20px 10px 20px;
+    gap: 10px;
+}
+
+.badge-viewer {
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: #e2e8f0;
+    background-color: #111;
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: 1px solid #222;
+    flex: 1;
+    text-align: center;
+}
+
+.menu-action-inline-btn {
+    flex: 1;
+    background-color: #238636;
+    color: #ffffff !important;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 0.8rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: background 0.2s;
+}
+
+.menu-action-inline-btn i {
+    color: #ffffff !important; /* লগইন লক আইকন সাদা থাকবে */
+}
+
+.side-menu-items {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 15px;
+    gap: 8px;
+}
+
+.menu-group-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #8b949e;
+    letter-spacing: 1px;
+    padding: 10px 10px 5px 10px;
+}
+
+.menu-item {
+    color: #e2e8f0 !important;
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 600;
+    padding: 12px 12px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: background 0.2s;
+}
+
+.menu-item:hover {
+    background-color: #111;
+}
+
+.menu-divider {
+    border: 0;
+    height: 1px;
+    background-color: #1a1a1a;
+    margin: 15px 0 5px 0;
+}
+
+/* ==========================================================================
+   📸 নিউজ স্লাইডার সেম-টু-সেম পিকচার রেন্ডার ফিক্স (No Crop Layer)
+   ========================================================================== */
+.slider-wrapper {
+    width: 100%;
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #1a1a1a;
+    background-color: #000;
+    margin-bottom: 20px;
+}
+
+.news-carousel-track {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+}
+
+.news-carousel-track::-webkit-scrollbar { display: none; }
+
+.slide-node {
+    flex: 0 0 100%;
+    width: 100%;
+    scroll-snap-align: start;
+    position: relative;
+    height: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.slide-node img {
+    width: 100%;
+    height: auto;
+    max-height: 500px;
+    object-fit: contain !important; /* ছবি না কেটে সেম টু সেম দেখাবে */
+}
+
+.placeholder-banner {
+    padding: 40px 20px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #0a0a0a, #000000);
+}
+
+/* ক্যাপশন নো-লিমিট টেক্সট লাইন বাই লাইন রেন্ডার ফিক্স */
+.slide-caption-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: linear-gradient(transparent, rgba(0,0,0,0.95));
+    padding: 15px 20px;
+    color: #e2e8f0;
+    font-size: 0.95rem;
+    white-space: normal !important; /* লাইন ব্রেক হবে */
+    word-wrap: break-word !important;
+}
+
+.carousel-dots {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+}
+
+.dot-node {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: rgba(255,255,255,0.2);
+    cursor: pointer;
+}
+
+.dot-node.active-dot {
+    background-color: #00f5d4; /* ডট ও পেস্ট কালার হবে */
+    width: 18px;
+    border-radius: 4px;
+}
+
+/* ==========================================================================
+   ⚽ প্লেয়ার টিম বার (ছোট আকারের টাইটেল কলাপসিবল বক্স)
+   ========================================================================== */
+.teams-management-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 25px;
+    padding: 0 5px;
+}
+
+.team-toggle-bar {
+    background-color: #050505;
+    border: 1px solid #1a1a1a;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.team-bar-header {
+    padding: 14px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 0.95rem;
+    transition: background 0.2s;
+}
+
+.team-bar-header:hover {
+    background-color: #0a0a0a;
+}
+
+.team-collapsible-content {
+    display: none;
+    padding: 15px;
+    border-top: 1px solid #1a1a1a;
+    background-color: #020202;
+}
+
+.team-collapsible-content.show-content {
+    display: block;
+}
+
+/* সার্চ বক্স ও ইনপুট প্যানেল ডিজাইন */
+.admin-search-box-wrap {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.admin-search-box-wrap input {
+    flex: 1;
+    background: #000;
+    border: 1px solid #1a1a1a;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 6px;
+}
+
+.admin-search-box-wrap button {
+    background: #238636;
+    border: none;
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* 🪪 মডার্ন ছোট মিনি আইডি কার্ড গ্রিড (Small Mini ID Cards) */
+.mini-cards-flex-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+}
+
+.mini-player-id-card {
+    background-color: #0a0a0a;
+    border: 1px solid #1a1a1a;
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.mini-player-id-card:hover {
+    transform: translateY(-2px);
+    border-color: #00f5d4;
+}
+
+.mini-avatar-node {
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    border: 2px solid #ff3333; /* মেম্বারদের জন্য রেড নিওন বর্ডার ফ্রেম */
+    object-fit: cover;
+    margin: 0 auto 8px auto;
+    display: block;
+    box-shadow: 0 0 8px rgba(255,51,51,0.3);
+}
+
+.mini-card-name {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #e2e8f0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mini-card-uid {
+    font-size: 0.75rem;
+    color: #8b949e;
+    margin-top: 2px;
+}
+
+/* ==========================================================================
+   📜 রুলস সেকশন টেক্সট নো-লিমিট ও লাইন-বাই-লাইন ফিক্স
+   ========================================================================== */
+.unlimited-text-render li {
+    white-space: normal !important;  /* লাইন কাটবে না */
+    word-wrap: break-word !important; /* বড় শব্দ ভেঙে নিচে যাবে */
+    overflow-wrap: break-word !important;
+    font-size: 0.95rem;
+    color: #e2e8f0 !important;
+}
+
+.app-page-content {
+    display: none;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.app-page-content.active-page { display: block; }
 
 .section-title {
     text-align: center;
-    margin: 40px 0 20px;
-    color: #ffffff; /* পিওর সাদা */
-    font-size: 1.8rem;
+    margin: 15px 0 20px;
+    font-size: 1.3rem;
 }
 
 .game-modes-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 25px;
-    margin-bottom: 40px;
-}
-
-.mode-card {
-    background-color: #121212; /* হালকা কালো চারকোল শেড কার্ড */
-    border: 1px solid #222222; /* হালকা বর্ডার */
-    border-radius: 12px;
-    padding: 30px 20px;
-    text-align: center;
-    cursor: pointer;
-    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-.mode-card:hover {
-    transform: translateY(-5px);
-    border-color: #58a6ff;
-    box-shadow: 0 8px 25px rgba(88, 166, 255, 0.2);
-}
-
-/* রিয়াল আইকনগুলোর স্পেশাল সাইজ */
-.mode-icon {
-    font-size: 3.5rem;
-    margin-bottom: 15px;
-}
-
-.mode-card h3 {
-    color: #ffffff; /* পিওর সাদা */
-    margin-bottom: 10px;
-    font-size: 1.4rem;
-}
-
-.mode-card p {
-    color: #ffffff; /* ডেসক্রিপশন টেক্সট পিওর সাদা */
-    font-size: 0.95rem;
-}
-
-.divider {
-    border: 0;
-    height: 1px;
-    background: #222222;
-    margin: 40px 0;
-}
-
-/* ==========================================================================
-   অনুবাদ (Translate) বাটনের স্টাইল
-   ========================================================================== */
-.translate-container {
-    display: flex;
-    justify-content: center;
+    gap: 16px;
     margin-bottom: 25px;
 }
 
-#lang-toggle-btn {
-    background-color: #1f6feb;
-    color: #ffffff;
-    border: none;
-    padding: 10px 20px;
-    font-size: 1rem;
-    font-weight: bold;
-    border-radius: 20px;
+.mode-card {
+    background-color: #050505; 
+    border: 1px solid #1a1a1a;
+    border-radius: 12px;
+    padding: 25px 20px;
+    text-align: center;
     cursor: pointer;
-    box-shadow: 0 4px 10px rgba(31, 111, 235, 0.3);
-    transition: background-color 0.2s, transform 0.1s;
+    transition: transform 0.2s, border-color 0.2s;
 }
 
-#lang-toggle-btn:hover {
-    background-color: #388bfd;
-    transform: scale(1.03);
+.mode-card:hover {
+    transform: translateY(-3px);
+    border-color: #00f5d4;
 }
 
-/* ==========================================================================
-   ডাইনামিক ইনফো প্যানেল ও রুলস লিস্টের স্টাইল
-   ========================================================================== */
+.mode-icon {
+    font-size: 2.8rem;
+    margin-bottom: 12px;
+}
+
+.mode-card h3 {
+    color: #e2e8f0 !important;
+    margin-bottom: 8px;
+    font-size: 1.25rem;
+}
+
+.mode-card p {
+    color: #e2e8f0 !important;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
 .info-panel {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-    gap: 30px;
+    gap: 20px;
 }
 
 .info-box {
-    background-color: #121212; /* হালকা কালো চারকোল শেড বক্স */
-    border: 1px solid #222222;
+    background-color: #050505;
+    border: 1px solid #1a1a1a;
     border-radius: 12px;
-    padding: 25px;
-    position: relative;
+    padding: 20px;
 }
 
 .info-box h3 {
-    color: #ffffff; /* শিরোনাম পিওর সাদা */
     margin-bottom: 15px;
-    border-bottom: 2px solid #222222;
+    border-bottom: 1px solid #1a1a1a;
     padding-bottom: 8px;
-    font-size: 1.3rem;
 }
 
-/* ওএল (OL) এর মাধ্যমে অটোমেটিক সিরিয়াল নম্বর ১,২,৩ বসার স্টাইল */
-.dynamic-list {
-    padding-left: 20px;
-}
+.dynamic-list { padding-left: 20px; }
+.dynamic-list li { margin-bottom: 12px; }
+.delete-rule-btn { background: none; border: none; color: #f85149 !important; cursor: pointer; }
 
-.dynamic-list li {
-    margin-bottom: 15px;
-    color: #ffffff; /* লিস্টের টেক্সট পিওর সাদা */
-    font-size: 1rem;
-    position: relative;
-}
-
-/* ডিলিট বাটন (শুধু অ্যাডমিন দেখতে পারবে) */
-.delete-rule-btn {
-    background: none;
-    border: none;
-    color: #f85149;
-    cursor: pointer;
-    margin-left: 10px;
-    font-size: 0.85rem;
-}
-
-.delete-rule-btn:hover {
-    text-decoration: underline;
-}
-
-/* অ্যাডমিন অ্যাকশন বাটন এবং ইনপুটের ডিজাইন */
 .admin-only-actions {
-    margin-top: 20px;
+    margin-top: 15px;
     display: flex;
     flex-direction: column;
     gap: 10px;
-    background-color: #000000; /* ইনপুট প্যানেল ব্যাকগ্রাউন্ড ডার্ক ব্ল্যাক */
+    background-color: #0a0a0a; 
     padding: 15px;
     border-radius: 8px;
-    border: 1px dashed #222222;
+    border: 1px dashed #222;
 }
 
-.admin-only-actions input {
-    background-color: #121212;
-    border: 1px solid #222222;
-    color: #ffffff;
-    padding: 8px;
+.admin-only-actions textarea, .admin-only-actions input, .file-input-custom {
+    background-color: #000000;
+    border: 1px solid #1a1a1a;
+    color: #e2e8f0 !important;
+    padding: 10px;
     border-radius: 6px;
+    width: 100%;
 }
 
-.admin-only-actions button {
-    background-color: #238636;
-    color: white;
+/* ==========================================================================
+   🆔 রেজিস্ট্রেশন ও ডিটেইলস মডাল ডিজাইন
+   ========================================================================== */
+.reg-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.92);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    padding: 15px;
+}
+
+.reg-modal-content {
+    background-color: #050505;
+    border: 1px solid #1a1a1a;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 460px;
+    overflow: hidden;
+    box-shadow: 0 12px 36px rgba(0,0,0,0.9);
+}
+
+.mini-page-upload {
+    max-width: 500px !important;
+}
+
+.reg-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #000000;
+    padding: 16px 20px;
+    border-bottom: 1px solid #1a1a1a;
+}
+
+.close-reg-modal {
+    background: none;
     border: none;
-    padding: 8px;
+    color: #e2e8f0;
+    font-size: 1.6rem;
+    cursor: pointer;
+}
+
+.reg-form-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.unique-avatar-frame-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.gaming-photo-frame {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background-color: #000;
+    border: 3px solid #ff3333; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 12px rgba(255, 51, 51, 0.4);
+}
+
+.frame-placeholder-icon {
+    font-size: 1.8rem;
+    color: #222;
+}
+
+.frame-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #ff3333;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.form-grid-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.reg-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.reg-input-group label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #8b949e;
+}
+
+.reg-input-group input {
+    background-color: #000;
+    border: 1px solid #1a1a1a;
+    border-radius: 6px;
+    padding: 10px;
+    color: #e2e8f0;
+    width: 100%;
+}
+
+/* 🪪 প্লেয়ার ফুল প্রোফাইল ডিটেইলস কার্ড ভিউ */
+.profile-details-card {
+    max-width: 420px !important;
+}
+
+.id-card-inner-view {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 15px;
+}
+
+.details-avatar-frame {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 3px solid #ff3333;
+    object-fit: cover;
+    box-shadow: 0 0 15px rgba(255,51,51,0.5);
+}
+
+.details-info-table {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: #000;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #1a1a1a;
+    text-align: left;
+}
+
+.info-row-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    border-bottom: 1px solid #111;
+    padding-bottom: 6px;
+}
+
+.info-row-item span:first-child {
+    color: #8b949e;
+    font-weight: 600;
+}
+
+.info-row-item span:last-child {
+    color: #fff;
+    font-weight: 700;
+}
+
+/* ফেসবুক প্রোফাইল লিঙ্ক লুপ বার বাটন */
+.fb-link-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: #111;
+    border-radius: 50%;
+    border: 1px solid #222;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+
+.fb-link-icon-btn:hover {
+    background: #1a1a1a;
+}
+
+.fb-link-icon-btn i {
+    color: #3366ff !important; /* ফেসবুকের অরিজিনাল থিম ব্লু */
+    font-size: 1.1rem !important;
+}
+
+.card-admin-action-row {
+    width: 100%;
+    display: flex;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.btn-remove-action {
+    flex: 1;
+    background: #ff5252;
+    color: #fff;
+    border: none;
+    padding: 10px;
     border-radius: 6px;
     font-weight: bold;
     cursor: pointer;
 }
 
-.admin-only-actions button:hover {
-    background-color: #2ea043;
+.generated-id-box {
+    background: linear-gradient(135deg, #0a0a0a, #000000);
+    border: 1px dashed #ff3333;
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.id-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #8b949e;
+    letter-spacing: 1px;
+}
+
+.id-value {
+    font-size: 1.2rem;
+    font-weight: 900;
+    color: #e2e8f0;
+    letter-spacing: 1.5px;
+}
+
+.reg-submit-btn {
+    background-color: #238636;
+    color: #ffffff;
+    border: none;
+    padding: 12px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
 }
 
 /* ==========================================================================
-   ফুটার এবং অ্যাডমিন বাটন
+   📱 মডার্ন বটম নেভিগেশন বার
    ========================================================================== */
-.main-footer {
+.app-bottom-nav {
     position: fixed;
     bottom: 0;
     left: 0;
     width: 100%;
-    background-color: #000000; /* ফুটার বার একদম কুচকুচে কালো */
-    padding: 15px 20px;
-    text-align: right;
-    border-top: 1px solid #222222;
+    height: 65px;
+    background-color: #0a0a0a; 
+    border-top: 1px solid #1a1a1a;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
     z-index: 1000;
+    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.5);
 }
 
-#admin-login-btn {
-    background-color: #121212; /* বাটন হালকা কালো */
-    color: #ffffff;            /* টেক্সট পিওর সাদা */
-    border: 1px solid #222222;
-    padding: 8px 16px;
-    border-radius: 6px;
-    font-size: 0.9rem;
+.nav-tab-node {
+    background: none;
+    border: none;
+    color: #e2e8f0;
+    opacity: 0.4; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
     cursor: pointer;
-    font-weight: 600;
+    flex: 1;
+    height: 100%;
 }
 
-#admin-login-btn:hover {
-    background-color: #ff7b72;
-    color: #ffffff;
-    border-color: #ff7b72;
+.nav-tab-node i { font-size: 1.25rem; }
+.nav-tab-node span { font-size: 0.75rem; font-weight: 600; color: #e2e8f0 !important; }
+.nav-tab-node.active-tab { opacity: 1; }
+
+.translate-container { display: flex; }
+#lang-toggle-btn {
+    background-color: #000;
+    color: #e2e8f0 !important;
+    border: 1px solid #1a1a1a;
+    padding: 6px 16px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 @media (max-width: 768px) {
-    .main-header h1 {
-        font-size: 1.8rem;
-    }
-    .info-panel {
-        grid-template-columns: 1fr;
-    }
+    .info-panel { grid-template-columns: 1fr; }
 }
